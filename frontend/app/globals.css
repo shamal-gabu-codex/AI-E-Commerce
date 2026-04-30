@@ -1,0 +1,50 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  color: #172026;
+  background: #f4f7f6;
+}
+
+.table {
+  min-width: 760px;
+}
+
+@media (max-width: 768px) {
+  .card-body,
+  .rounded-lg.border.bg-white {
+    padding: 1rem !important;
+  }
+
+  h1 {
+    font-size: 1rem !important;
+  }
+
+  .table {
+    min-width: 640px;
+  }
+}
+
+.modal-backdrop {
+  z-index: -1;
+}
+
+.btn-primary {
+  --bs-btn-bg: #0f766e;
+  --bs-btn-border-color: #0f766e;
+  --bs-btn-hover-bg: #115e59;
+  --bs-btn-hover-border-color: #115e59;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
