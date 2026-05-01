@@ -1,9 +1,9 @@
 import { ReactNode } from "react";
 
-export function Card({ title, children }: { title?: string; children: ReactNode }) {
+export function Card({ title, children, className = "" }: { title?: string; children: ReactNode; className?: string }) {
   return (
-    <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-      {title && <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-slate-500">{title}</h2>}
+    <section className={`rounded-lg border border-line bg-panel p-5 shadow-card ${className}`}>
+      {title && <h2 className="mb-4 text-base font-bold text-ink">{title}</h2>}
       {children}
     </section>
   );

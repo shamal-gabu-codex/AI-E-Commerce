@@ -5,11 +5,21 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        ink: "#172026",
-        mist: "#f4f7f6",
-        teal: "#0f766e",
-        amber: "#b7791f",
-        coral: "#e05f4f"
+        ink: "#111827",
+        muted: "#667085",
+        mist: "#f8fafc",
+        panel: "#ffffff",
+        line: "#e5e7eb",
+        primary: "#6d28d9",
+        violet: "#8b5cf6",
+        teal: "#10b981",
+        amber: "#f59e0b",
+        coral: "#ef4444",
+        sky: "#3b82f6"
+      },
+      boxShadow: {
+        card: "0 1px 2px rgba(16, 24, 40, 0.04), 0 1px 3px rgba(16, 24, 40, 0.08)",
+        lift: "0 10px 30px rgba(91, 33, 182, 0.14)"
       }
     }
   },

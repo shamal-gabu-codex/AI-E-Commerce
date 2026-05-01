@@ -8,8 +8,9 @@
 
 body {
   margin: 0;
-  color: #172026;
-  background: #f4f7f6;
+  color: #111827;
+  background: #f8fafc;
+  font-size: 14px;
 }
 
 .table {
@@ -36,10 +37,10 @@ body {
 }
 
 .btn-primary {
-  --bs-btn-bg: #0f766e;
-  --bs-btn-border-color: #0f766e;
-  --bs-btn-hover-bg: #115e59;
-  --bs-btn-hover-border-color: #115e59;
+  --bs-btn-bg: #6d28d9;
+  --bs-btn-border-color: #6d28d9;
+  --bs-btn-hover-bg: #5b21b6;
+  --bs-btn-hover-border-color: #5b21b6;
 }
 
 button,
@@ -47,4 +48,41 @@ input,
 select,
 textarea {
   font: inherit;
+}
+
+input,
+select,
+textarea,
+.form-control,
+.form-select {
+  border-color: #e5e7eb !important;
+  border-radius: 0.5rem !important;
+  color: #111827 !important;
+  font-size: 0.875rem !important;
+  min-height: 2.5rem;
+}
+
+input:focus,
+select:focus,
+textarea:focus,
+.form-control:focus,
+.form-select:focus {
+  border-color: #8b5cf6 !important;
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.16) !important;
+}
+
+.btn {
+  border-radius: 0.5rem !important;
+  font-size: 0.8125rem !important;
+  font-weight: 700 !important;
+}
+
+.app-scrollbar::-webkit-scrollbar {
+  height: 8px;
+  width: 8px;
+}
+
+.app-scrollbar::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 999px;
 }

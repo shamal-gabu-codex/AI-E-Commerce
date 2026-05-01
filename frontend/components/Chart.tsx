@@ -11,7 +11,7 @@ export function SalesTrendChart({ data }: { data: unknown[] }) {
           <XAxis dataKey="date" tick={{ fontSize: 11 }} />
           <YAxis tick={{ fontSize: 11 }} />
           <Tooltip />
-          <Area type="monotone" dataKey="revenue" stroke="#0f766e" fill="#99f6e4" />
+          <Area type="monotone" dataKey="revenue" stroke="#6d28d9" fill="#ddd6fe" />
         </AreaChart>
       </ResponsiveContainer>
     </div>
@@ -27,7 +27,7 @@ export function TopProductsChart({ data }: { data: unknown[] }) {
           <XAxis dataKey="name" tick={{ fontSize: 11 }} />
           <YAxis tick={{ fontSize: 11 }} />
           <Tooltip />
-          <Bar dataKey="revenue" fill="#b7791f" radius={[4, 4, 0, 0]} />
+          <Bar dataKey="revenue" fill="#6366f1" radius={[6, 6, 0, 0]} />
         </BarChart>
       </ResponsiveContainer>
     </div>

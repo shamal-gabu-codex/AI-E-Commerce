@@ -1,6 +1,6 @@
 "use client";
 
-import { Send } from "lucide-react";
+import { Bot, Loader2, Send, Sparkles, UserRound } from "lucide-react";
 import { useState } from "react";
 import { chatService } from "@/services/chatService";
 
@@ -35,28 +35,47 @@ export function ChatBox() {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap gap-2">
-        {suggestions.map((s) => (
-          <button key={s} className="rounded-md border border-slate-200 px-3 py-2 text-xs text-slate-600 hover:bg-mist" onClick={() => ask(s)}>
-            {s}
-          </button>
-        ))}
-      </div>
-      <div className="min-h-[420px] rounded-lg border border-slate-200 bg-white p-4">
-        {messages.length === 0 && <div className="pt-32 text-center text-sm text-slate-500">Ask Gemini for a business recommendation based on your sales, inventory, supplier, and review data.</div>}
+      <div className="min-h-[420px] rounded-lg border border-line bg-white">
+        <div className="app-scrollbar min-h-[330px] space-y-3 p-4">
+        {messages.length === 0 && (
+          <div className="flex gap-3">
+            <span className="grid h-9 w-9 shrink-0 place-items-center rounded-md bg-fuchsia-100 text-primary"><Bot className="h-5 w-5" /></span>
+            <div className="rounded-lg bg-slate-100 px-4 py-3 text-sm text-slate-700">Hello! I am your AI E-Commerce Intelligence Assistant. Ask about sales trends, inventory, demand, and customer reviews.</div>
+          </div>
+        )}
         <div className="space-y-3">
           {messages.map((m, i) => (
-            <div key={i} className={`max-w-[80%] whitespace-pre-line rounded-lg px-4 py-3 text-sm ${m.role === "user" ? "ml-auto bg-teal text-white" : "bg-mist text-slate-700"}`}>
-              {m.text}
+            <div key={i} className={`flex gap-3 ${m.role === "user" ? "justify-end" : ""}`}>
+              {m.role !== "user" && <span className="grid h-9 w-9 shrink-0 place-items-center rounded-md bg-fuchsia-100 text-primary"><Bot className="h-5 w-5" /></span>}
+              <div className={`max-w-[80%] whitespace-pre-line rounded-lg px-4 py-3 text-sm ${m.role === "user" ? "bg-primary text-white" : "bg-slate-100 text-slate-700"}`}>{m.text}</div>
+              {m.role === "user" && <span className="grid h-9 w-9 shrink-0 place-items-center rounded-md bg-primary text-white"><UserRound className="h-5 w-5" /></span>}
             </div>
           ))}
         </div>
+        </div>
+        <div className="border-t border-line p-3">
+          <div className="mb-3 flex flex-wrap gap-2">
+            {suggestions.map((s) => (
+              <button key={s} disabled={loading} className="rounded-full border border-line px-3 py-1.5 text-xs font-bold text-slate-600 hover:bg-violet/10 hover:text-primary disabled:opacity-60" onClick={() => ask(s)}>
+                {s}
+              </button>
+            ))}
+          </div>
+          <div className="flex gap-2">
+            <div className="relative flex-1">
+              <Sparkles className="absolute right-3 top-3 h-4 w-4 text-primary" />
+              <input value={question} onChange={(e) => setQuestion(e.target.value)} className="w-full rounded-md border border-line px-4 py-3 pr-10 text-sm" placeholder="Ask me anything about your business..." />
+            </div>
+            <button disabled={loading} title="Send" onClick={() => ask()} className="inline-flex items-center gap-2 rounded-md bg-primary px-4 text-sm font-bold text-white disabled:opacity-60">
+              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+              {loading ? "Sending..." : "Send"}
+            </button>
+          </div>
+        </div>
       </div>
-      <div className="flex gap-2">
-        <input value={question} onChange={(e) => setQuestion(e.target.value)} className="flex-1 rounded-md border border-slate-200 px-4 py-3 text-sm" placeholder="Ask a business question..." />
-        <button disabled={loading} title="Send" onClick={() => ask()} className="rounded-md bg-teal px-4 text-white disabled:opacity-60">
-          <Send className="h-5 w-5" />
-        </button>
+      <div className="rounded-lg border border-violet-100 bg-violet-50 p-4">
+        <div className="flex items-center gap-2 font-extrabold text-ink"><Sparkles className="h-4 w-4 text-primary" />Powered by Gemini AI</div>
+        <p className="mt-1 text-xs text-muted">Using business data retrieval to provide real-time ecommerce insights with natural language understanding.</p>
       </div>
     </div>
   );

@@ -1,4 +1,4 @@
-DATABASE_URL=postgresql://postgres:password@localhost:5432/ai_ecommerce
+DATABASE_URL=postgresql://postgres:9QxVKhIfuZOQR2Lp@db.qzxxepcvdchhxtskcrna.supabase.co:5432/postgres?sslmode=require
 SECRET_KEY=your-secret-key
 ACCESS_TOKEN_EXPIRE_MINUTES=60
 GEMINI_API_KEY=your-gemini-api-key
