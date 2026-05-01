@@ -1,6 +1,6 @@
 "use client";
 
-import { Pencil } from "lucide-react";
+import { AlertTriangle, BarChart3, Bot, Pencil, Search } from "lucide-react";
 import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import { Card } from "@/components/Card";
@@ -56,35 +56,62 @@ export default function InventoryPage() {
 
   return (
     <div className="space-y-5">
-      <Card title="Supplier Restock Suggestions">
+      <div>
+        <h1 className="text-2xl font-extrabold text-ink">Inventory Management</h1>
+        <p className="text-sm text-muted">Track and optimize stock levels</p>
+      </div>
+      {suggestions.length > 0 && (
+        <div className="flex gap-3 rounded-lg border border-red-200 bg-red-50 p-4 text-red-700">
+          <AlertTriangle className="h-5 w-5" />
+          <div>
+            <div className="font-extrabold">Low Stock Alert</div>
+            <p className="text-xs">{suggestions.length} item(s) need supplier attention.</p>
+          </div>
+        </div>
+      )}
+      <Card title="Stock Level Trend">
+        <div className="flex h-56 items-end gap-5 px-4">
+          {[72, 82, 66, 88, 98, 92].map((height, index) => (
+            <div key={index} className="flex flex-1 flex-col items-center gap-2">
+              <div className="w-full rounded-t-md bg-indigo-500" style={{ height: `${height}%` }} />
+              <span className="text-xs text-muted">{["Jan","Feb","Mar","Apr","May","Jun"][index]}</span>
+            </div>
+          ))}
+        </div>
+      </Card>
+      <Card title="AI Restock Recommendations" className="bg-fuchsia-50/60">
         {loading ? <div className="placeholder-glow"><span className="placeholder col-12 mb-2" /><span className="placeholder col-8" /></div> : (
-          <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-            {suggestions.map((s, i) => <div key={i} className="card border-0 shadow-sm"><div className="card-body"><div className="fw-semibold">{s.product}</div><div className="small text-secondary">{s.action}</div><div className="mt-2 small text-danger">Stock {s.stock}, days left {s.days_left ?? "n/a"}, lead time {s.lead_time_days}</div></div></div>)}
+          <div className="grid gap-3 md:grid-cols-2">
+            {suggestions.map((s, i) => <div key={i} className="flex gap-3 rounded-md bg-white p-3"><span className="grid h-8 w-8 place-items-center rounded-md bg-violet-100 text-primary"><Bot className="h-4 w-4" /></span><div><div className="font-bold text-ink">{s.product}</div><div className="text-xs text-muted">{s.action}</div><div className="mt-2 text-xs font-bold text-primary">Stock {s.stock}, days left {s.days_left ?? "n/a"}, lead time {s.lead_time_days}</div></div></div>)}
           </div>
         )}
       </Card>
-      <div className="row g-4">
-        <div className="col-12 col-xl-4">
+      <div className="grid gap-5 xl:grid-cols-[360px_1fr]">
+        <div>
           <Card title="Update Stock">
-            <form onSubmit={submit} className="row g-3">
-              <div className="col-12"><input value={form.id || ""} className="form-control" placeholder="Inventory ID" readOnly /></div>
-              <div className="col-12"><input value={form.stock} onChange={(e) => setForm({ ...form, stock: e.target.value })} className="form-control" placeholder="Stock" required /></div>
-              <div className="col-12"><input value={form.reorder_level} onChange={(e) => setForm({ ...form, reorder_level: e.target.value })} className="form-control" placeholder="Reorder level" required /></div>
-              {message && <div className="col-12"><div className="alert alert-success py-2">{message}</div></div>}
-              {error && <div className="col-12"><div className="alert alert-danger py-2">{error}</div></div>}
-              <div className="col-12"><LoadingButton loading={saving} type="submit">Update Inventory</LoadingButton></div>
+            <form onSubmit={submit} className="space-y-3">
+              <input value={form.id || ""} className="form-control" placeholder="Inventory ID" readOnly />
+              <input value={form.stock} onChange={(e) => setForm({ ...form, stock: e.target.value })} className="form-control" placeholder="Stock" required />
+              <input value={form.reorder_level} onChange={(e) => setForm({ ...form, reorder_level: e.target.value })} className="form-control" placeholder="Reorder level" required />
+              {message && <div className="rounded-md bg-emerald-50 px-3 py-2 text-sm font-bold text-emerald-700">{message}</div>}
+              {error && <div className="rounded-md bg-red-50 px-3 py-2 text-sm font-bold text-red-700">{error}</div>}
+              <LoadingButton loading={saving} type="submit">Update Inventory</LoadingButton>
             </form>
           </Card>
         </div>
-        <div className="col-12 col-xl-8">
-          <Card title="Inventory">
+        <div>
+          <Card>
+            <div className="mb-4 flex items-center rounded-md border border-line px-3">
+              <Search className="h-4 w-4 text-slate-400" />
+              <input className="border-0 px-3 py-2 focus:shadow-none" placeholder="Search inventory by product name or SKU..." readOnly />
+            </div>
             <DataTable loading={loading} rows={rows} columns={[
               { key: "id", label: "ID" },
               { key: "product_id", label: "Product ID" },
-              { key: "stock", label: "Stock" },
+              { key: "stock", label: "Stock", render: (row) => <span className="inline-flex items-center gap-2"><BarChart3 className="h-4 w-4 text-primary" />{row.stock} units</span> },
               { key: "reorder_level", label: "Reorder Level" },
               { key: "last_updated", label: "Last Updated" },
-              { key: "actions", label: "Actions", render: (row) => <button className="btn btn-sm btn-outline-secondary" onClick={() => setForm({ id: row.id, stock: String(row.stock), reorder_level: String(row.reorder_level) })}><Pencil className="h-4 w-4" /></button> }
+              { key: "actions", label: "Actions", render: (row) => <button className="rounded-md bg-primary px-3 py-1.5 text-xs font-bold text-white" onClick={() => setForm({ id: row.id, stock: String(row.stock), reorder_level: String(row.reorder_level) })}>Restock</button> }
             ]} />
           </Card>
         </div>

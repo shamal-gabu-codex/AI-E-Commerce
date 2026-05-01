@@ -1,5 +1,7 @@
 "use client";
 
+import { Loader2 } from "lucide-react";
+
 type ConfirmModalProps = {
   open: boolean;
   title?: string;
@@ -34,9 +36,9 @@ export function ConfirmModal({
           </div>
           <div className="modal-footer">
             <button type="button" className="btn btn-outline-secondary" disabled={loading} onClick={onCancel}>Cancel</button>
-            <button type="button" className="btn btn-primary" disabled={loading} onClick={onConfirm}>
-              {loading && <span className="spinner-border spinner-border-sm me-2" aria-hidden="true" />}
-              {confirmText}
+            <button type="button" className="btn btn-primary inline-flex items-center gap-2" disabled={loading} onClick={onConfirm}>
+              {loading ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : null}
+              {loading ? "Processing..." : confirmText}
             </button>
           </div>
         </div>
