@@ -11,29 +11,47 @@ from app.services.error_log_service import write_error_log
 
 app = FastAPI(title="AI E-Commerce Sales & Inventory Intelligence API", version="1.0.0")
 
+# app.add_middleware(
+#     CORSMiddleware,
+#     allow_origins=[
+#         "http://localhost:3000",
+#         "http://127.0.0.1:3000",
+#         "http://localhost:3001",
+#         "http://127.0.0.1:3001",
+#         "http://localhost:3002",
+#         "http://127.0.0.1:3002",
+#         "http://localhost:3003",
+#         "http://127.0.0.1:3003",
+#         "https://*.vercel.app",
+#     ],
+#     allow_credentials=True,
+#     allow_methods=["*"],
+#     allow_headers=["*"],
+# )
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000",
-        "http://127.0.0.1:3000",
-        "http://localhost:3001",
-        "http://127.0.0.1:3001",
-        "http://localhost:3002",
-        "http://127.0.0.1:3002",
-        "http://localhost:3003",
-        "http://127.0.0.1:3003",
-        "https://*.vercel.app",
-    ],
-    allow_credentials=True,
+    allow_origins=["*"],
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 
-@app.on_event("startup")
-def on_startup():
-    init_db()
+def safe_write_error_log(db, request: Request, message: str, status_code: int, exc: Exception | None = None, level: str = "error") -> str | None:
+    try:
+        return write_error_log(db, request, message, status_code, exc, level)
+    except Exception:
+        return None
 
+
+# @app.on_event("startup")
+# def on_startup():
+#     init_db()
+
+@app.get("/")
+def root():
+    return {"status": "running", "service": "backend"}
 
 @app.middleware("http")
 async def error_logging_middleware(request: Request, call_next):
@@ -42,7 +60,7 @@ async def error_logging_middleware(request: Request, call_next):
     except Exception as exc:
         db = SessionLocal()
         try:
-            request_id = write_error_log(db, request, str(exc), 500, exc)
+            request_id = safe_write_error_log(db, request, str(exc), 500, exc)
         finally:
             db.close()
         return JSONResponse(
@@ -56,7 +74,7 @@ async def http_exception_handler(request: Request, exc: HTTPException):
     if exc.status_code >= 400 and request.url.path not in ["/health", "/health/db"]:
         db = SessionLocal()
         try:
-            write_error_log(db, request, str(exc.detail), exc.status_code, None, "warning" if exc.status_code < 500 else "error")
+            safe_write_error_log(db, request, str(exc.detail), exc.status_code, None, "warning" if exc.status_code < 500 else "error")
         finally:
             db.close()
     return JSONResponse(status_code=exc.status_code, content={"detail": exc.detail})
@@ -66,7 +84,7 @@ async def http_exception_handler(request: Request, exc: HTTPException):
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
     db = SessionLocal()
     try:
-        write_error_log(db, request, str(exc.errors()), 422, None, "warning")
+        safe_write_error_log(db, request, str(exc.errors()), 422, None, "warning")
     finally:
         db.close()
     return JSONResponse(status_code=422, content={"detail": exc.errors()})
