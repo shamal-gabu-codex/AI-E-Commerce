@@ -2,11 +2,12 @@ from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy import text
+from sqlalchemy import inspect, text
+from sqlalchemy.exc import SQLAlchemyError
 
 from app.api import ai, auth, brands, chat, dashboard, error_logs, inventory, notifications, products, reviews, sales, suppliers, uploads
 from app.api.deps import get_current_user
-from app.database import SessionLocal, init_db
+from app.database import SessionLocal, engine, init_db
 from app.services.error_log_service import write_error_log
 
 app = FastAPI(title="AI E-Commerce Sales & Inventory Intelligence API", version="1.0.0")
@@ -99,14 +100,32 @@ def health():
 def database_health():
     db = SessionLocal()
     try:
-        product_count = db.execute(text("select count(*) from products")).scalar()
-        brand_count = db.execute(text("select count(*) from brands")).scalar()
+        db.execute(text("select 1")).scalar()
+        inspector = inspect(engine)
+        table_names = set(inspector.get_table_names())
+        required_tables = {"brands", "products", "users", "inventory", "sales", "reviews"}
+        missing_tables = sorted(required_tables - table_names)
+
+        product_count = db.execute(text("select count(*) from products")).scalar() if "products" in table_names else None
+        brand_count = db.execute(text("select count(*) from brands")).scalar() if "brands" in table_names else None
+
         return {
-            "status": "ok",
+            "status": "ok" if not missing_tables else "schema_incomplete",
             "database": "supabase_postgresql",
+            "missing_tables": missing_tables,
             "products": product_count,
             "brands": brand_count,
         }
+    except SQLAlchemyError as exc:
+        return JSONResponse(
+            status_code=503,
+            content={
+                "status": "error",
+                "database": "supabase_postgresql",
+                "detail": "Database connection failed. Check Vercel DATABASE_URL and Supabase SSL settings.",
+                "error": str(exc.__class__.__name__),
+            },
+        )
     finally:
         db.close()
 
