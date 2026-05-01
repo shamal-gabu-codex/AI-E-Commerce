@@ -1,7 +1,5 @@
 import json
 
-import google.generativeai as genai
-
 from app.config import settings
 
 
@@ -23,6 +21,11 @@ Return JSON:
 """
     if not settings.gemini_api_key:
         return _mock_response(context)
+    try:
+        import google.generativeai as genai
+    except ImportError:
+        return _mock_response(context)
+
     genai.configure(api_key=settings.gemini_api_key)
     model = genai.GenerativeModel(settings.gemini_model)
     text = model.generate_content(prompt).text.strip().strip("`")
