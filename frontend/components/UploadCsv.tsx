@@ -1,6 +1,6 @@
 "use client";
 
-import { Loader2, Upload } from "lucide-react";
+import { CloudUpload, Loader2, Upload } from "lucide-react";
 import { useState } from "react";
 
 export function UploadCsv({ onUpload }: { onUpload: (form: FormData) => Promise<unknown> }) {
@@ -25,8 +25,11 @@ export function UploadCsv({ onUpload }: { onUpload: (form: FormData) => Promise<
         }
       }}
     >
-      <input name="file" type="file" accept=".csv" className="rounded-md border border-slate-200 bg-white px-3 py-2 text-sm" required disabled={uploading} />
-      <button className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-bold text-white disabled:opacity-60" disabled={uploading}>
+      <div className="theme-dropzone w-full sm:w-auto sm:min-w-[320px]">
+        <CloudUpload className="mx-auto mb-2 h-6 w-6 text-primary" />
+        <input name="file" type="file" accept=".csv" className="form-control max-w-full" required disabled={uploading} />
+      </div>
+      <button className="app-action" disabled={uploading}>
         {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
         {uploading ? "Uploading..." : "Upload CSV"}
       </button>

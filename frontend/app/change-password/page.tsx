@@ -5,6 +5,7 @@ import type { FormEvent } from "react";
 import { Card } from "@/components/Card";
 import { ConfirmModal } from "@/components/ConfirmModal";
 import { LoadingButton } from "@/components/Loading";
+import { PageHeader } from "@/components/PageHeader";
 import { authService } from "@/services/authService";
 
 export default function ChangePasswordPage() {
@@ -44,8 +45,10 @@ export default function ChangePasswordPage() {
   }
 
   return (
-    <Card title="Change Password">
-      <form onSubmit={submit} className="row g-3">
+    <div className="space-y-5">
+      <PageHeader title="Password" subtitle="Update your account password" />
+      <Card title="Change Password">
+        <form onSubmit={submit} className="row g-3">
         <div className="col-md-4">
           <label className="form-label">Current Password</label>
           <input type="password" value={form.current_password} onChange={(e) => setForm({ ...form, current_password: e.target.value })} className="form-control" required />
@@ -58,13 +61,14 @@ export default function ChangePasswordPage() {
           <label className="form-label">Confirm Password</label>
           <input type="password" value={form.confirm_password} onChange={(e) => setForm({ ...form, confirm_password: e.target.value })} className="form-control" required minLength={6} />
         </div>
-        {message && <div className="col-12"><div className="alert alert-success py-2">{message}</div></div>}
-        {error && <div className="col-12"><div className="alert alert-danger py-2">{error}</div></div>}
+        {message && <div className="col-12"><div className="theme-alert success py-2">{message}</div></div>}
+        {error && <div className="col-12"><div className="theme-alert danger py-2">{error}</div></div>}
         <div className="col-12">
           <LoadingButton loading={saving} type="submit">Change Password</LoadingButton>
         </div>
-      </form>
-      <ConfirmModal open={confirm} message="Are you sure you want to update your password?" confirmText="Update Password" loading={saving} onConfirm={save} onCancel={() => setConfirm(false)} />
-    </Card>
+        </form>
+        <ConfirmModal open={confirm} message="Are you sure you want to update your password?" confirmText="Update Password" loading={saving} onConfirm={save} onCancel={() => setConfirm(false)} />
+      </Card>
+    </div>
   );
 }

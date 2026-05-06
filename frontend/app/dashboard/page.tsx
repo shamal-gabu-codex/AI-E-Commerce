@@ -1,11 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { AlertTriangle, Bot, Package, ShoppingCart, TrendingUp, Users } from "lucide-react";
+import { AlertTriangle, Bot, CircleArrowRight, Package, ShoppingCart, Users } from "lucide-react";
 import { Card } from "@/components/Card";
 import { SalesTrendChart, TopProductsChart } from "@/components/Chart";
 import { DataTable } from "@/components/DataTable";
 import { CardGridSkeleton, GridSkeleton, PanelSkeleton } from "@/components/Loading";
+import { PageHeader } from "@/components/PageHeader";
 import { api } from "@/services/api";
 
 export default function DashboardPage() {
@@ -33,26 +34,26 @@ export default function DashboardPage() {
   ];
   return (
     <div className="space-y-5">
-      <div>
-        <h1 className="text-2xl font-extrabold text-ink">Dashboard</h1>
-        <p className="text-sm text-muted">AI-powered insights and analytics</p>
-      </div>
-      <div className="grid gap-4 md:grid-cols-4">
-        {stats.map((stat) => {
+      <PageHeader title="Dashboard" subtitle="AI-powered insights and analytics" />
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        {stats.map((stat, index) => {
           const Icon = stat.icon;
+          const color = index === 0 ? "secondary" : index === 1 ? "primary" : "";
           return (
-            <Card key={stat.label}>
-              <div className="flex items-start justify-between">
-                <div className={`grid h-11 w-11 place-items-center rounded-lg ${stat.color}`}><Icon className="h-5 w-5" /></div>
-                <span className="text-xs font-bold text-emerald-500">{stat.note}</span>
+            <div key={stat.label} className={`theme-metric-card ${color}`}>
+              <span className="round small" />
+              <span className="round big" />
+              <div className="relative z-[1] flex items-start justify-between">
+                <div className={`theme-avatar ${color ? "bg-white/15 text-white" : stat.color}`}><Icon className="h-5 w-5" /></div>
+                <span className={`inline-flex items-center gap-1 text-xs font-bold ${color ? "text-white/80" : "text-emerald-500"}`}><CircleArrowRight className="h-3.5 w-3.5" />{stat.note}</span>
               </div>
-              <div className="mt-4 text-xs font-bold text-muted">{stat.label}</div>
-              <div className="mt-1 text-2xl font-extrabold text-ink">{stat.value}</div>
-            </Card>
+              <div className={`relative z-[1] mt-4 text-xs font-bold ${color ? "text-white/70" : "text-muted"}`}>{stat.label}</div>
+              <div className={`relative z-[1] mt-1 text-2xl font-bold ${color ? "text-white" : "text-ink"}`}>{stat.value}</div>
+            </div>
           );
         })}
       </div>
-      <Card className="bg-violet-50/70" title="AI Recommendations">
+      <Card className="bg-[#eef6ff]" title="AI Recommendations">
         <div className="space-y-3">
           {data.action_cards.map((a: any) => (
             <div key={a.id} className="flex gap-3 rounded-md border border-violet-100 bg-white p-3">
@@ -65,7 +66,7 @@ export default function DashboardPage() {
           ))}
         </div>
       </Card>
-      <div className="grid gap-5 xl:grid-cols-[2fr_1fr]">
+      <div className="theme-dashboard-grid">
         <Card title="Sales Trend & Forecast"><SalesTrendChart data={data.sales_trend} /></Card>
         <Card title="Top Products"><TopProductsChart data={data.top_products} /></Card>
       </div>

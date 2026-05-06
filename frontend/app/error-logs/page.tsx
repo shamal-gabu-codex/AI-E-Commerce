@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { Card } from "@/components/Card";
 import { DataTable } from "@/components/DataTable";
 import { LoadingButton } from "@/components/Loading";
+import { PageHeader } from "@/components/PageHeader";
 import { errorLogService } from "@/services/errorLogService";
 
 export default function ErrorLogsPage() {
@@ -26,22 +27,17 @@ export default function ErrorLogsPage() {
 
   return (
     <div className="space-y-5">
-      <Card title="Error Log Filters">
-        <div className="row g-3 align-items-end">
-          <div className="col-12 col-md-4">
-            <label className="form-label">Status Code</label>
-            <input value={filters.status_code} onChange={(e) => setFilters({ ...filters, status_code: e.target.value })} className="form-control" placeholder="500, 401, 422" />
+      <PageHeader title="Error Logs" subtitle="Search and inspect application API errors" />
+      <Card
+        title="Application Error Logs"
+        actions={
+          <div className="flex flex-wrap items-center gap-2">
+            <input value={filters.status_code} onChange={(e) => setFilters({ ...filters, status_code: e.target.value })} className="form-control w-auto min-w-36" placeholder="Status code" />
+            <input value={filters.path} onChange={(e) => setFilters({ ...filters, path: e.target.value })} className="form-control w-auto min-w-52" placeholder="Path" />
+            <LoadingButton loading={loading} onClick={load}><Search className="h-4 w-4 me-2" />Search</LoadingButton>
           </div>
-          <div className="col-12 col-md-6">
-            <label className="form-label">Path</label>
-            <input value={filters.path} onChange={(e) => setFilters({ ...filters, path: e.target.value })} className="form-control" placeholder="/products" />
-          </div>
-          <div className="col-12 col-md-2">
-            <LoadingButton loading={loading} onClick={load} className="btn btn-primary w-100"><Search className="h-4 w-4 me-2" />Search</LoadingButton>
-          </div>
-        </div>
-      </Card>
-      <Card title="Application Error Logs">
+        }
+      >
         <DataTable
           loading={loading}
           rows={rows}

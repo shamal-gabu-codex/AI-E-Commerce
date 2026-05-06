@@ -7,6 +7,7 @@ import { Card } from "@/components/Card";
 import { ConfirmModal } from "@/components/ConfirmModal";
 import { DataTable } from "@/components/DataTable";
 import { LoadingButton } from "@/components/Loading";
+import { PageHeader } from "@/components/PageHeader";
 import { brandService } from "@/services/brandService";
 
 type BrandRow = {
@@ -100,38 +101,41 @@ export default function BrandsPage() {
 
   return (
     <div className="space-y-5">
+      <PageHeader title="Brands" subtitle="Organize product brands and catalog ownership" />
       <div className="grid gap-5 xl:grid-cols-[380px_1fr]">
         <Card title={form.id ? "Edit Brand" : "Add Brand"}>
           <form onSubmit={submit} className="space-y-3">
-            <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Brand name" className="w-full rounded-md border border-slate-200 px-3 py-2" required />
-            <textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="Description" className="min-h-24 w-full rounded-md border border-slate-200 px-3 py-2" />
-            <select value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value.toLowerCase() as "active" | "inactive" })} className="w-full rounded-md border border-slate-200 px-3 py-2" required>
+            <div className="theme-field"><label>Brand name</label><input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Brand name" className="form-control" required /></div>
+            <div className="theme-field"><label>Description</label><textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="Description" className="form-control min-h-24" /></div>
+            <div className="theme-field"><label>Status</label><select value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value.toLowerCase() as "active" | "inactive" })} className="form-select" required>
               <option value="active">Active</option>
               <option value="inactive">Inactive</option>
-            </select>
-            {message && <p className="text-sm text-slate-500">{message}</p>}
+            </select></div>
+            {message && <div className="theme-alert success text-sm font-bold">{message}</div>}
             <div className="flex gap-2">
               <LoadingButton loading={saving} type="submit">{form.id ? "Update" : "Save"}</LoadingButton>
-              {form.id > 0 && <button type="button" onClick={() => setForm(emptyForm)} className="rounded-md border border-slate-200 px-4 py-2 text-slate-600">Cancel</button>}
+              {form.id > 0 && <button type="button" onClick={() => setForm(emptyForm)} className="app-secondary">Cancel</button>}
             </div>
           </form>
         </Card>
-        <Card title="Search & Filter">
-          <div className="flex flex-wrap gap-3">
-            <div className="relative min-w-64 flex-1">
-              <Search className="pointer-events-none absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
-              <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search brand or description" className="w-full rounded-md border border-slate-200 py-2 pl-9 pr-3" />
+      </div>
+      <Card
+        title="Brands"
+        actions={
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="relative min-w-64 flex-1 sm:min-w-[360px]">
+              <Search className="pointer-events-none absolute left-3 top-3.5 h-4 w-4 text-slate-400" />
+              <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search brand or description" className="form-control w-full py-2 pl-9 pr-3" />
             </div>
-            <select value={status} onChange={(e) => setStatus(e.target.value)} className="rounded-md border border-slate-200 px-3 py-2">
+            <select value={status} onChange={(e) => setStatus(e.target.value)} className="form-select w-auto min-w-36">
               <option value="">All status</option>
               <option value="active">Active</option>
               <option value="inactive">Inactive</option>
             </select>
-            <LoadingButton loading={loading} onClick={load} className="btn btn-primary">Apply</LoadingButton>
+            <LoadingButton loading={loading} onClick={load}>Apply</LoadingButton>
           </div>
-        </Card>
-      </div>
-      <Card title="Brands">
+        }
+      >
         <DataTable
           loading={loading}
           rows={rows}
@@ -145,9 +149,9 @@ export default function BrandsPage() {
               label: "Actions",
               render: (row) => (
                 <div className="flex gap-2">
-                  <button title="View" onClick={() => setViewBrand(row)} className="btn btn-sm btn-outline-secondary"><Eye className="h-4 w-4" /></button>
-                  <button title="Edit" onClick={() => setForm({ id: row.id, name: row.name, description: row.description || "", status: row.status })} className="btn btn-sm btn-outline-secondary"><Pencil className="h-4 w-4" /></button>
-                  <button title="Delete" onClick={() => setConfirm({ type: "delete", id: row.id })} className="btn btn-sm btn-outline-danger"><Trash2 className="h-4 w-4" /></button>
+                  <button title="View" onClick={() => setViewBrand(row)} className="theme-icon-btn"><Eye className="h-4 w-4" /></button>
+                  <button title="Edit" onClick={() => setForm({ id: row.id, name: row.name, description: row.description || "", status: row.status })} className="theme-icon-btn text-blue-600"><Pencil className="h-4 w-4" /></button>
+                  <button title="Delete" onClick={() => setConfirm({ type: "delete", id: row.id })} className="theme-icon-btn text-red-500"><Trash2 className="h-4 w-4" /></button>
                 </div>
               )
             }

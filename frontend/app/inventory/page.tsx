@@ -7,6 +7,7 @@ import { Card } from "@/components/Card";
 import { ConfirmModal } from "@/components/ConfirmModal";
 import { DataTable } from "@/components/DataTable";
 import { LoadingButton } from "@/components/Loading";
+import { PageHeader } from "@/components/PageHeader";
 import { inventoryService } from "@/services/inventoryService";
 
 export default function InventoryPage() {
@@ -56,12 +57,9 @@ export default function InventoryPage() {
 
   return (
     <div className="space-y-5">
-      <div>
-        <h1 className="text-2xl font-extrabold text-ink">Inventory Management</h1>
-        <p className="text-sm text-muted">Track and optimize stock levels</p>
-      </div>
+      <PageHeader title="Inventory Management" subtitle="Track and optimize stock levels" />
       {suggestions.length > 0 && (
-        <div className="flex gap-3 rounded-lg border border-red-200 bg-red-50 p-4 text-red-700">
+        <div className="theme-alert danger">
           <AlertTriangle className="h-5 w-5" />
           <div>
             <div className="font-extrabold">Low Stock Alert</div>
@@ -90,21 +88,25 @@ export default function InventoryPage() {
         <div>
           <Card title="Update Stock">
             <form onSubmit={submit} className="space-y-3">
-              <input value={form.id || ""} className="form-control" placeholder="Inventory ID" readOnly />
-              <input value={form.stock} onChange={(e) => setForm({ ...form, stock: e.target.value })} className="form-control" placeholder="Stock" required />
-              <input value={form.reorder_level} onChange={(e) => setForm({ ...form, reorder_level: e.target.value })} className="form-control" placeholder="Reorder level" required />
-              {message && <div className="rounded-md bg-emerald-50 px-3 py-2 text-sm font-bold text-emerald-700">{message}</div>}
-              {error && <div className="rounded-md bg-red-50 px-3 py-2 text-sm font-bold text-red-700">{error}</div>}
+              <div className="theme-field"><label>Inventory ID</label><input value={form.id || ""} className="form-control" placeholder="Inventory ID" readOnly /></div>
+              <div className="theme-field"><label>Stock</label><input value={form.stock} onChange={(e) => setForm({ ...form, stock: e.target.value })} className="form-control" placeholder="Stock" required /></div>
+              <div className="theme-field"><label>Reorder level</label><input value={form.reorder_level} onChange={(e) => setForm({ ...form, reorder_level: e.target.value })} className="form-control" placeholder="Reorder level" required /></div>
+              {message && <div className="theme-alert success text-sm font-bold">{message}</div>}
+              {error && <div className="theme-alert danger text-sm font-bold">{error}</div>}
               <LoadingButton loading={saving} type="submit">Update Inventory</LoadingButton>
             </form>
           </Card>
         </div>
         <div>
-          <Card>
-            <div className="mb-4 flex items-center rounded-md border border-line px-3">
+          <Card
+            title="Inventory"
+            actions={
+            <div className="app-search min-w-[280px] sm:min-w-[420px]">
               <Search className="h-4 w-4 text-slate-400" />
               <input className="border-0 px-3 py-2 focus:shadow-none" placeholder="Search inventory by product name or SKU..." readOnly />
             </div>
+            }
+          >
             <DataTable loading={loading} rows={rows} columns={[
               { key: "id", label: "ID" },
               { key: "product_id", label: "Product ID" },

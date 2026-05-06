@@ -34,7 +34,7 @@ export function CardGridSkeleton({ cards = 4 }: { cards?: number }) {
   return (
     <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
       {Array.from({ length: cards }).map((_, index) => (
-        <div key={index} className="rounded-lg border border-line bg-white p-5 shadow-card">
+        <div key={index} className="rounded-lg border border-line bg-white p-4 shadow-card">
           <div className="mb-4 h-11 w-11 animate-pulse rounded-lg bg-slate-200" />
           <div className="mb-3 h-3 w-24 animate-pulse rounded bg-slate-200" />
           <div className="h-7 w-20 animate-pulse rounded bg-slate-200" />
@@ -60,7 +60,7 @@ export function PanelSkeleton({ lines = 4 }: { lines?: number }) {
 export function LoadingButton({
   loading,
   children,
-  className = "rounded-md bg-primary px-4 py-2 text-sm font-bold text-white shadow-lift transition hover:bg-violet disabled:opacity-60",
+  className = "app-action",
   ...props
 }: ButtonHTMLAttributes<HTMLButtonElement> & { loading?: boolean }) {
   return (

@@ -56,7 +56,7 @@ export function ChatBox() {
         <div className="border-t border-line p-3">
           <div className="mb-3 flex flex-wrap gap-2">
             {suggestions.map((s) => (
-              <button key={s} disabled={loading} className="rounded-full border border-line px-3 py-1.5 text-xs font-bold text-slate-600 hover:bg-violet/10 hover:text-primary disabled:opacity-60" onClick={() => ask(s)}>
+              <button key={s} disabled={loading} className="rounded-full border border-line bg-white px-3 py-1.5 text-xs font-bold text-slate-600 hover:bg-slate-50 hover:text-primary disabled:opacity-60" onClick={() => ask(s)}>
                 {s}
               </button>
             ))}
@@ -66,7 +66,7 @@ export function ChatBox() {
               <Sparkles className="absolute right-3 top-3 h-4 w-4 text-primary" />
               <input value={question} onChange={(e) => setQuestion(e.target.value)} className="w-full rounded-md border border-line px-4 py-3 pr-10 text-sm" placeholder="Ask me anything about your business..." />
             </div>
-            <button disabled={loading} title="Send" onClick={() => ask()} className="inline-flex items-center gap-2 rounded-md bg-primary px-4 text-sm font-bold text-white disabled:opacity-60">
+            <button disabled={loading} title="Send" onClick={() => ask()} className="app-action">
               {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
               {loading ? "Sending..." : "Send"}
             </button>
