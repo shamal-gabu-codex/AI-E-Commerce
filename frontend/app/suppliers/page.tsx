@@ -1,11 +1,12 @@
 "use client";
 
-import { Building2, Clock, Mail, Pencil, Phone, Plus, Search, Star, Trash2 } from "lucide-react";
+import { Building2, Clock, Mail, Pencil, Phone, Search, Star, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import { Card } from "@/components/Card";
 import { ConfirmModal } from "@/components/ConfirmModal";
 import { LoadingButton, PanelSkeleton } from "@/components/Loading";
+import { PageHeader } from "@/components/PageHeader";
 import { supplierService } from "@/services/supplierService";
 
 const emptyForm = { id: 0, name: "", contact_person: "", email: "", phone: "", lead_time_days: "", address: "", status: "active" };
@@ -68,43 +69,41 @@ export default function SuppliersPage() {
 
   return (
     <div className="space-y-5">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-extrabold text-ink">Suppliers</h1>
-          <p className="text-sm text-muted">Manage your supplier relationships</p>
-        </div>
-        <button className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-bold text-white shadow-lift" onClick={() => setForm(emptyForm)}>
-          <Plus className="h-4 w-4" />
-          Add Supplier
-        </button>
-      </div>
+      <PageHeader title="Suppliers" subtitle="Manage your supplier relationships" />
       <Card title={form.id ? "Edit Supplier" : "Add New Supplier"}>
-          <form onSubmit={submit} className="grid gap-3 md:grid-cols-2">
-            {["name","contact_person","email","phone","lead_time_days","address"].map((n) => <div key={n}><input value={(form as any)[n]} onChange={(e) => setForm({ ...form, [n]: e.target.value })} placeholder={n.replace("_"," ")} className="form-control" required={n === "name" || n === "lead_time_days"} /></div>)}
-            <div>
+          <form onSubmit={submit} className="space-y-4">
+            <div className="theme-form-grid">
+            {["name","contact_person","email","phone","lead_time_days","address"].map((n) => <div className="theme-field" key={n}><label>{n.replace("_"," ")}</label><input value={(form as any)[n]} onChange={(e) => setForm({ ...form, [n]: e.target.value })} placeholder={n.replace("_"," ")} className="form-control" required={n === "name" || n === "lead_time_days"} /></div>)}
+            <div className="theme-field">
+              <label>Status</label>
               <select value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })} className="form-select"><option value="active">Active</option><option value="inactive">Inactive</option></select>
             </div>
-            {message && <div className="rounded-md bg-emerald-50 px-3 py-2 text-sm font-bold text-emerald-700 md:col-span-2">{message}</div>}
-            {error && <div className="rounded-md bg-red-50 px-3 py-2 text-sm font-bold text-red-700 md:col-span-2">{error}</div>}
-            <div className="flex gap-2 md:col-span-2"><LoadingButton loading={saving} type="submit">{form.id ? "Update" : "Save"}</LoadingButton>{form.id > 0 && <button type="button" className="rounded-md bg-slate-200 px-4 py-2 text-sm font-bold text-slate-700" onClick={() => setForm(emptyForm)}>Cancel</button>}</div>
+            </div>
+            {message && <div className="theme-alert success text-sm font-bold">{message}</div>}
+            {error && <div className="theme-alert danger text-sm font-bold">{error}</div>}
+            <div className="flex gap-2 border-t border-line pt-4"><LoadingButton loading={saving} type="submit">{form.id ? "Update" : "Save"}</LoadingButton>{form.id > 0 && <button type="button" className="app-secondary" onClick={() => setForm(emptyForm)}>Cancel</button>}</div>
           </form>
       </Card>
-      <Card>
-        <div className="mb-4 flex items-center rounded-md border border-line px-3">
+      <Card
+        title="Suppliers"
+        actions={
+        <div className="app-search min-w-[280px] sm:min-w-[360px]">
           <Search className="h-4 w-4 text-slate-400" />
           <input className="border-0 px-3 py-2 focus:shadow-none" placeholder="Search suppliers..." readOnly />
         </div>
+        }
+      >
         {loading ? (
           <PanelSkeleton lines={6} />
         ) : (
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             {rows.map((row) => (
-              <div key={row.id} className="rounded-lg border border-line bg-white p-4">
+              <div key={row.id} className="theme-list-card">
                 <div className="mb-4 flex items-start justify-between">
-                  <span className="grid h-10 w-10 place-items-center rounded-md bg-fuchsia-100 text-primary"><Building2 className="h-5 w-5" /></span>
+                  <span className="theme-avatar bg-fuchsia-100 text-primary"><Building2 className="h-5 w-5" /></span>
                   <div className="flex gap-2">
-                    <button className="rounded-md p-1.5 text-blue-600 hover:bg-blue-50" onClick={() => setForm({ ...row, lead_time_days: String(row.lead_time_days) })}><Pencil className="h-4 w-4" /></button>
-                    <button className="rounded-md p-1.5 text-red-500 hover:bg-red-50" onClick={() => setConfirm({ type: "delete", id: row.id })}><Trash2 className="h-4 w-4" /></button>
+                    <button className="theme-icon-btn text-blue-600" onClick={() => setForm({ ...row, lead_time_days: String(row.lead_time_days) })}><Pencil className="h-4 w-4" /></button>
+                    <button className="theme-icon-btn text-red-500" onClick={() => setConfirm({ type: "delete", id: row.id })}><Trash2 className="h-4 w-4" /></button>
                   </div>
                 </div>
                 <h3 className="font-extrabold text-ink">{row.name}</h3>

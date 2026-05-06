@@ -6,6 +6,7 @@ import { MessageSquarePlus, Star, ThumbsDown, ThumbsUp, Upload } from "lucide-re
 import { Card } from "@/components/Card";
 import { DataTable } from "@/components/DataTable";
 import { LoadingButton } from "@/components/Loading";
+import { PageHeader } from "@/components/PageHeader";
 import { UploadCsv } from "@/components/UploadCsv";
 import { reviewService } from "@/services/reviewService";
 
@@ -35,14 +36,9 @@ export default function ReviewsPage() {
   }
   return (
     <div className="space-y-5">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-extrabold text-ink">Customer Reviews</h1>
-          <p className="text-sm text-muted">AI-powered sentiment analysis</p>
-        </div>
-      </div>
+      <PageHeader title="Customer Reviews" subtitle="AI-powered sentiment analysis" />
       <div className="grid gap-5 xl:grid-cols-2">
-        <Card title="Add New Review"><form onSubmit={submit} className="space-y-3"><input name="product_id" placeholder="product id" className="form-control" required /><input name="rating" placeholder="rating 1-5" className="form-control" required /><textarea name="review_text" placeholder="Customer feedback..." className="form-control min-h-24" required /><LoadingButton loading={saving} type="submit"><span className="inline-flex items-center gap-2"><MessageSquarePlus className="h-4 w-4" />Analyze & Save</span></LoadingButton></form></Card>
+        <Card title="Add New Review"><form onSubmit={submit} className="space-y-3"><div className="theme-field"><label>Product ID</label><input name="product_id" placeholder="product id" className="form-control" required /></div><div className="theme-field"><label>Rating</label><input name="rating" placeholder="rating 1-5" className="form-control" required /></div><div className="theme-field"><label>Review text</label><textarea name="review_text" placeholder="Customer feedback..." className="form-control min-h-24" required /></div><LoadingButton loading={saving} type="submit"><span className="inline-flex items-center gap-2"><MessageSquarePlus className="h-4 w-4" />Analyze & Save</span></LoadingButton></form></Card>
         <Card title="Upload Reviews CSV"><div className="mb-3 flex items-center gap-2 text-sm font-bold text-muted"><Upload className="h-4 w-4" />Bulk import review feedback</div><UploadCsv onUpload={async (form) => { if (!window.confirm("Are you sure you want to process this file?")) return; await reviewService.upload(form); load(); }} /></Card>
       </div>
       <div className="grid gap-5 xl:grid-cols-[300px_1fr]">

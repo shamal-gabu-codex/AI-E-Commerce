@@ -5,6 +5,7 @@ import type { FormEvent } from "react";
 import { Card } from "@/components/Card";
 import { ConfirmModal } from "@/components/ConfirmModal";
 import { LoadingButton } from "@/components/Loading";
+import { PageHeader } from "@/components/PageHeader";
 import { authService } from "@/services/authService";
 
 export default function ProfilePage() {
@@ -49,25 +50,28 @@ export default function ProfilePage() {
   }
 
   return (
-    <Card title="Update Profile">
-      {loading ? <div className="placeholder-glow"><span className="placeholder col-6 mb-3" /><span className="placeholder col-12 mb-3" /><span className="placeholder col-12" /></div> : (
-        <form onSubmit={submit} className="row g-3">
-          <div className="col-md-6">
-            <label className="form-label">Name</label>
-            <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="form-control" required minLength={2} />
-          </div>
-          <div className="col-md-6">
-            <label className="form-label">Email</label>
-            <input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} className="form-control" required />
-          </div>
-          {message && <div className="col-12"><div className="alert alert-success py-2">{message}</div></div>}
-          {error && <div className="col-12"><div className="alert alert-danger py-2">{error}</div></div>}
-          <div className="col-12">
-            <LoadingButton loading={saving} type="submit">Update Profile</LoadingButton>
-          </div>
-        </form>
-      )}
-      <ConfirmModal open={confirm} message="Are you sure you want to update this record?" confirmText="Update" loading={saving} onConfirm={save} onCancel={() => setConfirm(false)} />
-    </Card>
+    <div className="space-y-5">
+      <PageHeader title="Profile" subtitle="Manage your account details" />
+      <Card title="Update Profile">
+        {loading ? <div className="placeholder-glow"><span className="placeholder col-6 mb-3" /><span className="placeholder col-12 mb-3" /><span className="placeholder col-12" /></div> : (
+          <form onSubmit={submit} className="row g-3">
+            <div className="col-md-6">
+              <label className="form-label">Name</label>
+              <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="form-control" required minLength={2} />
+            </div>
+            <div className="col-md-6">
+              <label className="form-label">Email</label>
+              <input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} className="form-control" required />
+            </div>
+            {message && <div className="col-12"><div className="theme-alert success py-2">{message}</div></div>}
+            {error && <div className="col-12"><div className="theme-alert danger py-2">{error}</div></div>}
+            <div className="col-12">
+              <LoadingButton loading={saving} type="submit">Update Profile</LoadingButton>
+            </div>
+          </form>
+        )}
+        <ConfirmModal open={confirm} message="Are you sure you want to update this record?" confirmText="Update" loading={saving} onConfirm={save} onCancel={() => setConfirm(false)} />
+      </Card>
+    </div>
   );
 }
