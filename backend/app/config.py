@@ -12,11 +12,16 @@ class Settings(BaseSettings):
     gemini_api_key: str | None = None
     gemini_model: str = "gemini-1.5-flash"
     redis_url: str | None = None
-    sendgrid_api_key: str | None = None
-    sendgrid_from_email: str | None = None
+    brevo_api_key: str | None = None
+    brevo_from_email: str | None = None
+    brevo_from_name: str = "AI E-Commerce Alerts"
     twilio_account_sid: str | None = None
     twilio_auth_token: str | None = None
     twilio_from_number: str | None = None
+    # Accepted temporarily so existing deployments can migrate without startup failure.
+    sendgrid_api_key: str | None = None
+    sendgrid_from_email: str | None = None
+    brevo_sms_sender: str | None = None
 
     class Config:
         env_file = str(BACKEND_DIR / ".env")
