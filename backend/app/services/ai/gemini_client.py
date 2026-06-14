@@ -19,16 +19,19 @@ Business Context:
 Return JSON:
 {{"summary":"","reasons":[],"recommended_actions":[],"priority":"low | medium | high"}}
 """
-    if not settings.gemini_api_key:
+    if not settings.gemini_api_key or settings.gemini_api_key.startswith("your-"):
         return _mock_response(context)
     try:
         import google.generativeai as genai
     except ImportError:
         return _mock_response(context)
 
-    genai.configure(api_key=settings.gemini_api_key)
-    model = genai.GenerativeModel(settings.gemini_model)
-    text = model.generate_content(prompt).text.strip().strip("`")
+    try:
+        genai.configure(api_key=settings.gemini_api_key)
+        model = genai.GenerativeModel(settings.gemini_model)
+        text = model.generate_content(prompt).text.strip().strip("`")
+    except Exception:
+        return _mock_response(context)
     if text.startswith("json"):
         text = text[4:].strip()
     try:

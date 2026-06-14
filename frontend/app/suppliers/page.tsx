@@ -1,7 +1,7 @@
 "use client";
 
-import { Building2, Clock, Mail, Pencil, Phone, Search, Star, Trash2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { Building2, Clock, Mail, Pencil, Phone, Search, Trash2 } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import type { FormEvent } from "react";
 import { Card } from "@/components/Card";
 import { ConfirmModal } from "@/components/ConfirmModal";
@@ -14,11 +14,13 @@ const emptyForm = { id: 0, name: "", contact_person: "", email: "", phone: "", l
 export default function SuppliersPage() {
   const [rows, setRows] = useState<any[]>([]);
   const [form, setForm] = useState(emptyForm);
+  const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [confirm, setConfirm] = useState<{ type: "save" | "delete"; id?: number } | null>(null);
+  const formRef = useRef<HTMLDivElement>(null);
 
   const load = async () => {
     setLoading(true);
@@ -67,9 +69,26 @@ export default function SuppliersPage() {
     }
   }
 
+  function moveToForm() {
+    setTimeout(() => {
+      formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      formRef.current?.querySelector<HTMLInputElement | HTMLSelectElement>("input, select")?.focus();
+    }, 0);
+  }
+
+  function editSupplier(row: any) {
+    setForm({ ...row, lead_time_days: String(row.lead_time_days) });
+    moveToForm();
+  }
+  const filteredRows = rows.filter((row) => {
+    const term = search.trim().toLowerCase();
+    return !term || [row.name, row.contact_person, row.email, row.phone].some((value) => String(value || "").toLowerCase().includes(term));
+  });
+
   return (
     <div className="space-y-5">
       <PageHeader title="Suppliers" subtitle="Manage your supplier relationships" />
+      <div ref={formRef}>
       <Card title={form.id ? "Edit Supplier" : "Add New Supplier"}>
           <form onSubmit={submit} className="space-y-4">
             <div className="theme-form-grid">
@@ -84,12 +103,13 @@ export default function SuppliersPage() {
             <div className="flex gap-2 border-t border-line pt-4"><LoadingButton loading={saving} type="submit">{form.id ? "Update" : "Save"}</LoadingButton>{form.id > 0 && <button type="button" className="app-secondary" onClick={() => setForm(emptyForm)}>Cancel</button>}</div>
           </form>
       </Card>
+      </div>
       <Card
         title="Suppliers"
         actions={
         <div className="app-search min-w-[280px] sm:min-w-[360px]">
           <Search className="h-4 w-4 text-slate-400" />
-          <input className="border-0 px-3 py-2 focus:shadow-none" placeholder="Search suppliers..." readOnly />
+          <input value={search} onChange={(e) => setSearch(e.target.value)} className="border-0 px-3 py-2 focus:shadow-none" placeholder="Search suppliers..." />
         </div>
         }
       >
@@ -97,12 +117,12 @@ export default function SuppliersPage() {
           <PanelSkeleton lines={6} />
         ) : (
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-            {rows.map((row) => (
+            {filteredRows.map((row) => (
               <div key={row.id} className="theme-list-card">
                 <div className="mb-4 flex items-start justify-between">
                   <span className="theme-avatar bg-fuchsia-100 text-primary"><Building2 className="h-5 w-5" /></span>
                   <div className="flex gap-2">
-                    <button className="theme-icon-btn text-blue-600" onClick={() => setForm({ ...row, lead_time_days: String(row.lead_time_days) })}><Pencil className="h-4 w-4" /></button>
+                    <button className="theme-icon-btn text-blue-600" onClick={() => editSupplier(row)}><Pencil className="h-4 w-4" /></button>
                     <button className="theme-icon-btn text-red-500" onClick={() => setConfirm({ type: "delete", id: row.id })}><Trash2 className="h-4 w-4" /></button>
                   </div>
                 </div>
@@ -111,7 +131,7 @@ export default function SuppliersPage() {
                 <p className="mt-1 flex items-center gap-2 text-xs text-muted"><Mail className="h-3.5 w-3.5" />{row.email || "No email"}</p>
                 <div className="mt-4 flex items-center gap-4 border-t border-line pt-3 text-xs text-muted">
                   <span className="flex items-center gap-1"><Clock className="h-3.5 w-3.5" />{row.lead_time_days || 0} days</span>
-                  <span className="flex items-center gap-1"><Star className="h-3.5 w-3.5 fill-amber text-amber" />4.5</span>
+                  <span className={`rounded-full px-2 py-1 font-bold capitalize ${row.status === "active" ? "bg-emerald-50 text-emerald-700" : "bg-slate-100 text-slate-500"}`}>{row.status}</span>
                 </div>
               </div>
             ))}

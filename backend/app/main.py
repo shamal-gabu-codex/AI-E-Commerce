@@ -1,3 +1,5 @@
+from contextlib import asynccontextmanager
+
 from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
@@ -8,9 +10,21 @@ from sqlalchemy.exc import SQLAlchemyError
 from app.api import ai, auth, brands, chat, dashboard, error_logs, inventory, notifications, products, reviews, sales, suppliers, uploads
 from app.api.deps import get_current_user
 from app.database import SessionLocal, engine, init_db
+from app.config import settings
 from app.services.error_log_service import write_error_log
 
-app = FastAPI(title="AI E-Commerce Sales & Inventory Intelligence API", version="1.0.0")
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    init_db()
+    yield
+
+
+app = FastAPI(
+    title="AI E-Commerce Sales & Inventory Intelligence API",
+    version="1.0.0",
+    lifespan=lifespan,
+)
 
 # app.add_middleware(
 #     CORSMiddleware,
@@ -45,10 +59,6 @@ def safe_write_error_log(db, request: Request, message: str, status_code: int, e
     except Exception:
         return None
 
-
-# @app.on_event("startup")
-# def on_startup():
-#     init_db()
 
 @app.get("/")
 def root():
@@ -109,9 +119,10 @@ def database_health():
         product_count = db.execute(text("select count(*) from products")).scalar() if "products" in table_names else None
         brand_count = db.execute(text("select count(*) from brands")).scalar() if "brands" in table_names else None
 
+        database_kind = "sqlite" if settings.database_url.startswith("sqlite") else "postgresql"
         return {
             "status": "ok" if not missing_tables else "schema_incomplete",
-            "database": "supabase_postgresql",
+            "database": database_kind,
             "missing_tables": missing_tables,
             "products": product_count,
             "brands": brand_count,
@@ -121,8 +132,8 @@ def database_health():
             status_code=503,
             content={
                 "status": "error",
-                "database": "supabase_postgresql",
-                "detail": "Database connection failed. Check Vercel DATABASE_URL and Supabase SSL settings.",
+                "database": "sqlite" if settings.database_url.startswith("sqlite") else "postgresql",
+                "detail": "Database connection failed. Check DATABASE_URL and database availability.",
                 "error": str(exc.__class__.__name__),
             },
         )

@@ -9,13 +9,13 @@ const socialLinks = [
 
 export function Footer() {
   return (
-    <footer className="fixed inset-x-0 bottom-0 z-30 border-t border-line bg-white/95 px-4 py-3 text-sm text-slate-600 backdrop-blur lg:left-[260px]">
+    <footer className="border-t border-line bg-white px-5 py-4 text-sm text-slate-600 sm:px-7">
       <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-        <div>
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
           <a href="https://xcodewebsolutions.com/" target="_blank" rel="noreferrer" className="font-bold text-ink no-underline hover:text-primary">
             Xcode Web Solutions LLP
           </a>
-          <div className="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-xs">
+          <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs">
             <a href="mailto:sales@xcodewebsolutions.com" className="inline-flex items-center gap-1.5 text-slate-600 no-underline hover:text-primary">
               <Mail className="h-3.5 w-3.5" />
               sales@xcodewebsolutions.com
@@ -37,9 +37,7 @@ export function Footer() {
           })}
         </div>
       </div>
-      <div className="mt-2 border-t border-line pt-2 text-xs text-slate-500">
-        Design and Developed By: Xcode Web Solutions LLP. Copy rights reserved - 2025-26.
-      </div>
+      <div className="mt-3 border-t border-line pt-3 text-[11px] text-slate-400">Designed and developed by Xcode Web Solutions LLP. Copyright 2025-26.</div>
     </footer>
   );
 }

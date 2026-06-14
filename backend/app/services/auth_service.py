@@ -20,4 +20,4 @@ def login_user(db: Session, email: str, password: str) -> tuple[str, User]:
     user = db.query(User).filter(User.email == email).first()
     if not user or not verify_password(password, user.password_hash):
         raise HTTPException(status_code=401, detail="Invalid email or password")
-    return create_access_token(user.email), user
+    return create_access_token(f"user:{user.id}"), user

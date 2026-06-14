@@ -10,7 +10,7 @@ class SupplierBase(BaseModel):
     phone: str | None = None
     lead_time_days: int = Field(default=7, ge=1)
     address: str | None = None
-    status: str = "active"
+    status: str = Field(default="active", pattern="^(active|inactive)$")
 
 
 class SupplierCreate(SupplierBase):

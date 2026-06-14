@@ -23,10 +23,10 @@ export function ConfirmModal({
 }: ConfirmModalProps) {
   if (!open) return null;
   return (
-    <div className="modal fade show d-block" tabIndex={-1} role="dialog">
-      <div className="modal-backdrop fade show bg-black/50" onClick={loading ? undefined : onCancel} />
-      <div className="modal-dialog modal-dialog-centered" role="document">
-        <div className="modal-content rounded-lg border-0 shadow-lg">
+    <div className="modal show d-block" tabIndex={-1} role="dialog">
+      <div className="fixed inset-0 z-[1050] bg-slate-950/55" onClick={loading ? undefined : onCancel} />
+      <div className="modal-dialog modal-dialog-centered relative z-[1060]" role="document">
+        <div className="modal-content rounded-lg border border-line bg-white shadow-2xl">
           <div className="modal-header border-line px-4 py-3">
             <h5 className="modal-title text-base font-extrabold text-ink">{title}</h5>
             <button type="button" className="btn-close" disabled={loading} onClick={onCancel} aria-label="Close" />

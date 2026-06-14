@@ -1,7 +1,8 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from app.database import get_db
+from app.models.product import Product
 from app.models.recommendation import AIRecommendation
 from app.services.ai.forecasting import forecast_product
 from app.services.ai.recommendation_engine import run_recommendations
@@ -11,6 +12,8 @@ router = APIRouter(prefix="/ai", tags=["AI"])
 
 @router.get("/forecast/{product_id}")
 def forecast(product_id: int, db: Session = Depends(get_db)):
+    if not db.get(Product, product_id):
+        raise HTTPException(404, "Product not found")
     data = forecast_product(db, product_id, 30)
     data["next_7_total"] = round(sum(x["yhat"] for x in data["forecast"][:7]), 2)
     data["next_14_total"] = round(sum(x["yhat"] for x in data["forecast"][:14]), 2)

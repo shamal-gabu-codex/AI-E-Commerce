@@ -1,7 +1,7 @@
 "use client";
 
 import { Package, Pencil, Search, Trash2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { FormEvent } from "react";
 import { Card } from "@/components/Card";
 import { ConfirmModal } from "@/components/ConfirmModal";
@@ -18,12 +18,14 @@ export default function ProductsPage() {
   const [rows, setRows] = useState<any[]>([]);
   const [brands, setBrands] = useState<any[]>([]);
   const [suppliers, setSuppliers] = useState<any[]>([]);
+  const [search, setSearch] = useState("");
   const [form, setForm] = useState(emptyForm);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [confirm, setConfirm] = useState<{ type: "save" | "delete"; id?: number } | null>(null);
+  const formRef = useRef<HTMLDivElement>(null);
 
   const load = async () => {
     setLoading(true);
@@ -91,9 +93,26 @@ export default function ProductsPage() {
     }
   }
 
+  function moveToForm() {
+    setTimeout(() => {
+      formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      formRef.current?.querySelector<HTMLInputElement | HTMLSelectElement>("input, select")?.focus();
+    }, 0);
+  }
+
+  function editProduct(row: any) {
+    setForm({ ...row, price: String(row.price), current_stock: String(row.current_stock), reorder_level: String(row.reorder_level), brand_id: String(row.brand_id || ""), supplier_id: String(row.supplier_id || "") });
+    moveToForm();
+  }
+  const filteredRows = rows.filter((row) => {
+    const term = search.trim().toLowerCase();
+    return !term || [row.name, row.sku, row.category].some((value) => String(value || "").toLowerCase().includes(term));
+  });
+
   return (
     <div className="space-y-5">
       <PageHeader title="Products" subtitle="Manage your product catalog" />
+      <div ref={formRef}>
       <Card title={form.id ? "Edit Product" : "Add New Product"}>
           <form onSubmit={submit} className="space-y-4">
             <div className="theme-form-grid">
@@ -126,25 +145,26 @@ export default function ProductsPage() {
             </div>
           </form>
       </Card>
+      </div>
       <Card
         title="Products"
         actions={
           <div className="app-search min-w-[280px] sm:min-w-[360px]">
             <Search className="h-4 w-4 text-slate-400" />
-            <input className="border-0 px-3 py-2 focus:shadow-none" placeholder="Search products by name or SKU..." readOnly />
+            <input value={search} onChange={(e) => setSearch(e.target.value)} className="border-0 px-3 py-2 focus:shadow-none" placeholder="Search products by name or SKU..." />
           </div>
         }
       >
           <DataTable
             loading={loading}
-            rows={rows}
+            rows={filteredRows}
             columns={[
               { key: "sku", label: "SKU" },
               { key: "name", label: "Product Name", render: (row) => <span className="inline-flex items-center gap-2"><span className="grid h-7 w-7 place-items-center rounded-md bg-violet-100 text-primary"><Package className="h-4 w-4" /></span>{row.name}</span> },
               { key: "category", label: "Category" },
               { key: "price", label: "Price", render: (row) => `$${Number(row.price || 0).toLocaleString()}` },
               { key: "current_stock", label: "Stock", render: (row) => <span className="rounded-full bg-emerald-100 px-2 py-1 text-xs font-bold text-emerald-700">{row.current_stock}</span> },
-              { key: "actions", label: "Actions", render: (row) => <div className="flex gap-2"><button title="Edit" className="theme-icon-btn text-blue-600" onClick={() => setForm({ ...row, price: String(row.price), current_stock: String(row.current_stock), reorder_level: String(row.reorder_level), brand_id: String(row.brand_id || ""), supplier_id: String(row.supplier_id || "") })}><Pencil className="h-4 w-4" /></button><button title="Delete" className="theme-icon-btn text-red-500" onClick={() => setConfirm({ type: "delete", id: row.id })}><Trash2 className="h-4 w-4" /></button></div> }
+              { key: "actions", label: "Actions", render: (row) => <div className="flex gap-2"><button title="Edit" className="theme-icon-btn text-blue-600" onClick={() => editProduct(row)}><Pencil className="h-4 w-4" /></button><button title="Delete" className="theme-icon-btn text-red-500" onClick={() => setConfirm({ type: "delete", id: row.id })}><Trash2 className="h-4 w-4" /></button></div> }
             ]}
           />
       </Card>

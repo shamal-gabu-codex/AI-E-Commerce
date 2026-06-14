@@ -14,5 +14,7 @@ class InventoryOut(BaseModel):
     stock: int
     reorder_level: int
     last_updated: datetime
+    product_name: str
+    sku: str
 
     model_config = {"from_attributes": True}

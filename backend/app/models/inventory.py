@@ -16,3 +16,11 @@ class Inventory(Base):
     last_updated: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     product = relationship("Product", back_populates="inventory")
+
+    @property
+    def product_name(self) -> str:
+        return self.product.name
+
+    @property
+    def sku(self) -> str:
+        return self.product.sku

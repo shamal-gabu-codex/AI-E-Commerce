@@ -3,7 +3,7 @@
 import { CloudUpload, Loader2, Upload } from "lucide-react";
 import { useState } from "react";
 
-export function UploadCsv({ onUpload }: { onUpload: (form: FormData) => Promise<unknown> }) {
+export function UploadCsv({ onUpload }: { onUpload: (form: FormData) => Promise<unknown | false> }) {
   const [status, setStatus] = useState("");
   const [uploading, setUploading] = useState(false);
   return (
@@ -15,7 +15,11 @@ export function UploadCsv({ onUpload }: { onUpload: (form: FormData) => Promise<
         setUploading(true);
         setStatus("Uploading...");
         try {
-          await onUpload(form);
+          const result = await onUpload(form);
+          if (result === false) {
+            setStatus("Upload cancelled");
+            return;
+          }
           setStatus("CSV imported");
           event.currentTarget.reset();
         } catch {

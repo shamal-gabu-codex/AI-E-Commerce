@@ -13,7 +13,7 @@ class ProductBase(BaseModel):
     reorder_level: int = Field(default=10, ge=0)
     supplier_id: int | None = None
     brand_id: int | None = None
-    status: str = "active"
+    status: str = Field(default="active", pattern="^(active|inactive)$")
 
 
 class ProductCreate(ProductBase):

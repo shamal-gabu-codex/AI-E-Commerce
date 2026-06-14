@@ -1,10 +1,13 @@
 from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from app.database import get_db
+from app.models.brand import Brand
 from app.models.inventory import Inventory
 from app.models.product import Product
 from app.models.recommendation import AIRecommendation
+from app.models.supplier import Supplier
 from app.schemas.product_schema import ProductCreate, ProductOut, ProductUpdate
 
 router = APIRouter(prefix="/products", tags=["Products"])
@@ -23,8 +26,21 @@ def get_product(product_id: int, db: Session = Depends(get_db)):
     return product
 
 
+def validate_product_payload(db: Session, payload: ProductCreate | ProductUpdate, product_id: int | None = None) -> None:
+    duplicate = db.query(Product).filter(func.lower(Product.sku) == payload.sku.lower())
+    if product_id is not None:
+        duplicate = duplicate.filter(Product.id != product_id)
+    if duplicate.first():
+        raise HTTPException(409, "SKU must be unique")
+    if payload.brand_id and not db.get(Brand, payload.brand_id):
+        raise HTTPException(400, "Selected brand does not exist")
+    if payload.supplier_id and not db.get(Supplier, payload.supplier_id):
+        raise HTTPException(400, "Selected supplier does not exist")
+
+
 @router.post("", response_model=ProductOut)
 def create_product(payload: ProductCreate, db: Session = Depends(get_db)):
+    validate_product_payload(db, payload)
     product = Product(**payload.model_dump())
     db.add(product)
     db.flush()
@@ -37,6 +53,7 @@ def create_product(payload: ProductCreate, db: Session = Depends(get_db)):
 @router.put("/{product_id}", response_model=ProductOut)
 def update_product(product_id: int, payload: ProductUpdate, db: Session = Depends(get_db)):
     product = get_product(product_id, db)
+    validate_product_payload(db, payload, product_id)
     for key, value in payload.model_dump().items():
         setattr(product, key, value)
     if product.inventory:
