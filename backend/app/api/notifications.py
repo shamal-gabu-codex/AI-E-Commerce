@@ -1,10 +1,10 @@
 from fastapi import APIRouter, Depends
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field
 from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.models.alert import Alert
-from app.services.notification_service import send_email, send_sms
+from app.services.notification_service import notification_status, send_email, send_sms
 
 router = APIRouter(prefix="/notifications", tags=["Notifications"])
 
@@ -16,8 +16,8 @@ class EmailPayload(BaseModel):
 
 
 class SmsPayload(BaseModel):
-    to_number: str
-    message: str
+    to_number: str = Field(pattern=r"^\+[1-9]\d{7,14}$")
+    message: str = Field(min_length=1, max_length=1600)
 
 
 @router.post("/send-email")
@@ -33,3 +33,8 @@ def sms(payload: SmsPayload, db: Session = Depends(get_db)):
 @router.get("/history")
 def history(db: Session = Depends(get_db)):
     return db.query(Alert).order_by(Alert.created_at.desc()).limit(100).all()
+
+
+@router.get("/status")
+def status():
+    return notification_status()

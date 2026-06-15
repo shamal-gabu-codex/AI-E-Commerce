@@ -13,10 +13,16 @@ def resolve_user_id_from_request(db: Session, request: Request) -> int | None:
     authorization = request.headers.get("authorization")
     if not authorization or not authorization.lower().startswith("bearer "):
         return None
-    email = decode_token(authorization.split(" ", 1)[1])
-    if not email:
+    subject = decode_token(authorization.split(" ", 1)[1])
+    if not subject:
         return None
-    user = db.query(User).filter(User.email == email).first()
+    if subject.startswith("user:"):
+        try:
+            user = db.get(User, int(subject.split(":", 1)[1]))
+        except ValueError:
+            user = None
+    else:
+        user = db.query(User).filter(User.email == subject).first()
     return user.id if user else None
 
 

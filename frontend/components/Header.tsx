@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { ChartNoAxesCombined, ExternalLink, LogOut, Mail, Menu, Phone, UserRound } from "lucide-react";
+import { Bell, ChevronDown, ExternalLink, LogOut, Mail, Menu, Phone, Search, UserRound } from "lucide-react";
 
 export function Header({ onMenu }: { onMenu?: () => void }) {
   const [profileOpen, setProfileOpen] = useState(false);
@@ -12,19 +12,14 @@ export function Header({ onMenu }: { onMenu?: () => void }) {
   }
 
   return (
-    <header className="fixed inset-x-0 top-0 z-30 h-20 border-b border-line bg-white/95 px-4 backdrop-blur">
+    <header className="app-header fixed right-0 top-0 z-30 h-[70px] bg-white px-4 lg:left-[264px] lg:px-7">
       <div className="flex h-full items-center justify-between gap-4">
         <div className="flex h-full items-center gap-4">
-          <Link href="/dashboard" className="hidden h-full w-[236px] items-center gap-3 border-r border-line pr-6 lg:flex">
-            <span className="grid h-11 w-11 place-items-center rounded-xl bg-primary text-white shadow-lift">
-              <ChartNoAxesCombined className="h-5 w-5" />
-            </span>
-            <span>
-              <span className="block text-[0.95rem] font-extrabold leading-tight text-ink">AI E-Commerce</span>
-              <span className="block text-[11px] font-semibold leading-tight text-slate-500">Sales Intelligence</span>
-            </span>
-          </Link>
-          <button className="rounded-md border border-line bg-white p-2 text-slate-600 shadow-card lg:hidden" onClick={onMenu} title="Open menu"><Menu className="h-4 w-4" /></button>
+          <button className="grid h-10 w-10 place-items-center rounded-lg border border-line bg-white text-slate-600 shadow-sm lg:hidden" onClick={onMenu} title="Open menu"><Menu className="h-4 w-4" /></button>
+          <div className="relative hidden xl:block">
+            <Search className="pointer-events-none absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
+            <input className="header-search h-10 w-64 rounded-lg border-0 bg-slate-50 pl-10 pr-4 text-sm" placeholder="Search workspace..." readOnly />
+          </div>
           <div className="hidden flex-wrap items-center gap-x-5 gap-y-1 text-xs font-semibold text-slate-600 md:flex">
             <a href="https://xcodewebsolutions.com/" target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-slate-700 no-underline hover:text-primary">
               Xcode Web Solutions LLP
@@ -41,15 +36,25 @@ export function Header({ onMenu }: { onMenu?: () => void }) {
           </div>
           <div className="md:hidden">
             <h1 className="text-sm font-extrabold text-ink">AI E-Commerce</h1>
-            <p className="text-xs text-slate-500">Sales & Inventory Intelligence</p>
+            <p className="text-[10px] text-slate-500">Sales & Inventory Intelligence</p>
           </div>
         </div>
         <div className="relative flex items-center gap-2">
-          <button className="grid h-10 w-10 place-items-center rounded-lg bg-primary text-white shadow-lift" title="Profile" onClick={() => setProfileOpen((value) => !value)}>
-            <UserRound className="h-4 w-4" />
+          <Link href="/notifications" className="relative grid h-10 w-10 place-items-center rounded-lg text-slate-500 hover:bg-slate-50 hover:text-primary" title="Notifications">
+            <Bell className="h-[18px] w-[18px]" />
+            <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-coral ring-2 ring-white" />
+          </Link>
+          <div className="mx-1 hidden h-8 w-px bg-line sm:block" />
+          <button className="flex items-center gap-2 rounded-lg p-1.5 pr-2 text-left hover:bg-slate-50" title="Profile" onClick={() => setProfileOpen((value) => !value)}>
+            <span className="grid h-9 w-9 place-items-center rounded-lg bg-gradient-to-br from-primary to-violet text-white shadow-sm"><UserRound className="h-4 w-4" /></span>
+            <span className="hidden sm:block">
+              <span className="block text-xs font-bold text-ink">Administrator</span>
+              <span className="block text-[10px] text-slate-500">Business account</span>
+            </span>
+            <ChevronDown className="hidden h-3.5 w-3.5 text-slate-400 sm:block" />
           </button>
           {profileOpen && (
-            <div className="absolute right-0 top-12 z-50 w-56 rounded-lg border border-line bg-white p-2 shadow-lg">
+            <div className="absolute right-0 top-14 z-50 w-60 rounded-xl border border-line bg-white p-2 shadow-xl">
               <div className="border-b border-line px-3 py-2">
                 <div className="text-sm font-bold text-ink">AI E-Commerce</div>
                 <div className="text-xs text-muted">Current session</div>

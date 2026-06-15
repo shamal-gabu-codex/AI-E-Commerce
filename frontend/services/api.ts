@@ -2,8 +2,19 @@
 
 import axios from "axios";
 
+function getApiBaseUrl() {
+  const configured = process.env.NEXT_PUBLIC_API_BASE_URL;
+  if (configured) return configured;
+
+  if (typeof window !== "undefined") {
+    return `${window.location.protocol}//${window.location.hostname}:8000`;
+  }
+
+  return "http://127.0.0.1:8000";
+}
+
 export const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000"
+  baseURL: getApiBaseUrl()
 });
 
 api.interceptors.request.use((config) => {

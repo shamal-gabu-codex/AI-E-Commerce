@@ -1,8 +1,9 @@
-from fastapi import APIRouter, Depends, UploadFile
+from fastapi import APIRouter, Depends, HTTPException, UploadFile
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from app.database import get_db
+from app.models.product import Product
 from app.models.review import Review
 from app.models.uploaded_file import UploadedFile
 from app.schemas.review_schema import ReviewCreate, ReviewOut
@@ -19,6 +20,8 @@ def list_reviews(db: Session = Depends(get_db)):
 
 @router.post("", response_model=ReviewOut)
 def create_review(payload: ReviewCreate, db: Session = Depends(get_db)):
+    if not db.get(Product, payload.product_id):
+        raise HTTPException(400, "Selected product does not exist")
     sentiment, score, issue = analyze_review(payload.review_text, payload.rating)
     review = Review(**payload.model_dump(), sentiment=sentiment, sentiment_score=score, issue_category=issue)
     db.add(review)
@@ -32,6 +35,8 @@ def upload_reviews_csv(file: UploadFile, db: Session = Depends(get_db)):
     path = save_upload(file)
     df = load_csv(path, ["product_id", "rating", "review_text"])
     for row in df.to_dict("records"):
+        if not db.get(Product, int(row["product_id"])):
+            raise HTTPException(400, f"Product {row['product_id']} does not exist")
         sentiment, score, issue = analyze_review(row["review_text"], int(row["rating"]))
         db.add(Review(**row, sentiment=sentiment, sentiment_score=score, issue_category=issue))
     db.add(UploadedFile(file_name=file.filename, file_type="reviews", status="processed"))

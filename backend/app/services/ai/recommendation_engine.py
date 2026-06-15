@@ -18,6 +18,8 @@ def product_days_left(db: Session, product: Product) -> float | None:
 
 def run_recommendations(db: Session) -> list[dict]:
     created: list[dict] = []
+    db.query(AIRecommendation).delete()
+    db.query(Alert).filter(Alert.type.in_(["low_stock", "demand_risk"])).delete()
     for product in db.query(Product).all():
         days_left = product_days_left(db, product)
         supplier = product.supplier

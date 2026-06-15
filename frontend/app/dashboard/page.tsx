@@ -11,8 +11,14 @@ import { api } from "@/services/api";
 
 export default function DashboardPage() {
   const [data, setData] = useState<any>(null);
-  useEffect(() => { api.get("/dashboard").then((r) => setData(r.data)).catch(() => setData(null)); }, []);
-  if (!data) {
+  const [error, setError] = useState("");
+  const load = () => {
+    setError("");
+    setData(null);
+    api.get("/dashboard").then((r) => setData(r.data)).catch(() => setError("Unable to load dashboard data. Check the backend connection and try again."));
+  };
+  useEffect(() => { load(); }, []);
+  if (!data && !error) {
     return (
       <div className="space-y-5">
         <div>
@@ -25,12 +31,24 @@ export default function DashboardPage() {
       </div>
     );
   }
+  if (error) {
+    return (
+      <div className="space-y-5">
+        <PageHeader title="Dashboard" subtitle="AI-powered insights and analytics" />
+        <div className="theme-alert danger">
+          <AlertTriangle className="h-5 w-5" />
+          <div className="flex-1"><div className="font-bold">Dashboard unavailable</div><p className="mt-1 text-sm">{error}</p></div>
+          <button className="app-secondary" onClick={load}>Retry</button>
+        </div>
+      </div>
+    );
+  }
   const s = data.summary;
   const stats = [
-    { label: "Total Sales", value: `$${s.total_revenue.toLocaleString()}`, icon: ShoppingCart, color: "bg-emerald-100 text-emerald-600", note: "+12.5%" },
-    { label: "Products", value: data.top_products?.length || 0, icon: Package, color: "bg-blue-100 text-blue-600", note: "+8.2%" },
-    { label: "Units Sold", value: s.total_quantity, icon: Users, color: "bg-violet-100 text-violet-600", note: "+15.3%" },
-    { label: "Low Stock Items", value: s.low_stock_count, icon: AlertTriangle, color: "bg-red-100 text-red-600", note: `${s.revenue_drop_pct}% drop` }
+    { label: "Total Revenue", value: `$${s.total_revenue.toLocaleString()}`, icon: ShoppingCart, color: "bg-emerald-100 text-emerald-600", note: "Recorded sales" },
+    { label: "Products", value: s.product_count, icon: Package, color: "bg-blue-100 text-blue-600", note: "Catalog total" },
+    { label: "Units Sold", value: s.total_quantity, icon: Users, color: "bg-violet-100 text-violet-600", note: "Recorded units" },
+    { label: "Low Stock Items", value: s.low_stock_count, icon: AlertTriangle, color: "bg-red-100 text-red-600", note: "Needs attention" }
   ];
   return (
     <div className="space-y-5">
@@ -53,14 +71,14 @@ export default function DashboardPage() {
           );
         })}
       </div>
-      <Card className="bg-[#eef6ff]" title="AI Recommendations">
-        <div className="space-y-3">
+      <Card className="border-blue-100 bg-gradient-to-br from-[#f5faff] to-white" title="AI Recommendations">
+        <div className="grid gap-3 lg:grid-cols-2">
           {data.action_cards.map((a: any) => (
-            <div key={a.id} className="flex gap-3 rounded-md border border-violet-100 bg-white p-3">
-              <span className="grid h-8 w-8 shrink-0 place-items-center rounded-md bg-violet-100 text-primary"><Bot className="h-4 w-4" /></span>
+            <div key={a.id} className="flex gap-3 rounded-xl border border-blue-100 bg-white p-4 shadow-sm">
+              <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-gradient-to-br from-blue-100 to-violet-100 text-primary"><Bot className="h-4 w-4" /></span>
               <div>
                 <div className="text-sm font-bold text-ink">{a.priority} Recommendation</div>
-                <p className="mt-1 text-xs text-muted">{a.message}</p>
+                <p className="mt-1 text-xs leading-5 text-muted">{a.message}</p>
               </div>
             </div>
           ))}

@@ -54,18 +54,20 @@ export default function ProfilePage() {
       <PageHeader title="Profile" subtitle="Manage your account details" />
       <Card title="Update Profile">
         {loading ? <div className="placeholder-glow"><span className="placeholder col-6 mb-3" /><span className="placeholder col-12 mb-3" /><span className="placeholder col-12" /></div> : (
-          <form onSubmit={submit} className="row g-3">
-            <div className="col-md-6">
-              <label className="form-label">Name</label>
+          <form onSubmit={submit} className="space-y-4">
+            <div className="theme-form-grid">
+            <div className="theme-field">
+              <label>Name</label>
               <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="form-control" required minLength={2} />
             </div>
-            <div className="col-md-6">
-              <label className="form-label">Email</label>
+            <div className="theme-field">
+              <label>Email</label>
               <input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} className="form-control" required />
             </div>
-            {message && <div className="col-12"><div className="theme-alert success py-2">{message}</div></div>}
-            {error && <div className="col-12"><div className="theme-alert danger py-2">{error}</div></div>}
-            <div className="col-12">
+            </div>
+            {message && <div className="theme-alert success py-2">{message}</div>}
+            {error && <div className="theme-alert danger py-2">{error}</div>}
+            <div className="border-t border-line pt-4">
               <LoadingButton loading={saving} type="submit">Update Profile</LoadingButton>
             </div>
           </form>

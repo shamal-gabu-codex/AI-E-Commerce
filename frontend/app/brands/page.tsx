@@ -1,7 +1,7 @@
 "use client";
 
 import { Eye, Pencil, Search, Trash2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { FormEvent } from "react";
 import { Card } from "@/components/Card";
 import { ConfirmModal } from "@/components/ConfirmModal";
@@ -47,6 +47,7 @@ export default function BrandsPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [confirm, setConfirm] = useState<{ type: "save" | "delete"; id?: number } | null>(null);
+  const formRef = useRef<HTMLDivElement>(null);
 
   const load = async () => {
     setLoading(true);
@@ -99,20 +100,34 @@ export default function BrandsPage() {
     }
   }
 
+  function moveToForm() {
+    setTimeout(() => {
+      formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      formRef.current?.querySelector<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>("input, select, textarea")?.focus();
+    }, 0);
+  }
+
+  function editBrand(row: BrandRow) {
+    setForm({ id: row.id, name: row.name, description: row.description || "", status: row.status });
+    moveToForm();
+  }
+
   return (
     <div className="space-y-5">
       <PageHeader title="Brands" subtitle="Organize product brands and catalog ownership" />
-      <div className="grid gap-5 xl:grid-cols-[380px_1fr]">
-        <Card title={form.id ? "Edit Brand" : "Add Brand"}>
-          <form onSubmit={submit} className="space-y-3">
+      <div ref={formRef}>
+      <Card title={form.id ? "Edit Brand" : "Add Brand"}>
+          <form onSubmit={submit} className="space-y-4">
+            <div className="grid gap-4 md:grid-cols-2">
             <div className="theme-field"><label>Brand name</label><input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Brand name" className="form-control" required /></div>
-            <div className="theme-field"><label>Description</label><textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="Description" className="form-control min-h-24" /></div>
             <div className="theme-field"><label>Status</label><select value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value.toLowerCase() as "active" | "inactive" })} className="form-select" required>
               <option value="active">Active</option>
               <option value="inactive">Inactive</option>
             </select></div>
+            <div className="theme-field md:col-span-2"><label>Description</label><textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="Description" className="form-control min-h-24" /></div>
+            </div>
             {message && <div className="theme-alert success text-sm font-bold">{message}</div>}
-            <div className="flex gap-2">
+            <div className="flex gap-2 border-t border-line pt-4">
               <LoadingButton loading={saving} type="submit">{form.id ? "Update" : "Save"}</LoadingButton>
               {form.id > 0 && <button type="button" onClick={() => setForm(emptyForm)} className="app-secondary">Cancel</button>}
             </div>
@@ -150,7 +165,7 @@ export default function BrandsPage() {
               render: (row) => (
                 <div className="flex gap-2">
                   <button title="View" onClick={() => setViewBrand(row)} className="theme-icon-btn"><Eye className="h-4 w-4" /></button>
-                  <button title="Edit" onClick={() => setForm({ id: row.id, name: row.name, description: row.description || "", status: row.status })} className="theme-icon-btn text-blue-600"><Pencil className="h-4 w-4" /></button>
+                  <button title="Edit" onClick={() => editBrand(row)} className="theme-icon-btn text-blue-600"><Pencil className="h-4 w-4" /></button>
                   <button title="Delete" onClick={() => setConfirm({ type: "delete", id: row.id })} className="theme-icon-btn text-red-500"><Trash2 className="h-4 w-4" /></button>
                 </div>
               )

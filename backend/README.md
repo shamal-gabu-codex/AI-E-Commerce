@@ -18,5 +18,8 @@ The app creates tables on startup. For production, replace this with Alembic mig
 ## Notes
 
 - Missing Gemini credentials enable mock response mode.
-- Missing SendGrid or Twilio credentials enable mock alert mode.
+- Missing provider credentials enable mock alert mode.
+- Transactional email uses Brevo. Configure `BREVO_API_KEY`, `BREVO_FROM_EMAIL`, and optionally `BREVO_FROM_NAME`.
+- Transactional SMS uses Twilio. Configure `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, and `TWILIO_FROM_NUMBER`.
+- Twilio trial accounts can send only to recipient phone numbers verified in the Twilio Console.
 - Celery task entrypoint: `app.tasks.analysis_tasks.run_scheduled_analysis`.

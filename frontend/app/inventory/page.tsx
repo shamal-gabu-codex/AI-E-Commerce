@@ -1,7 +1,7 @@
 "use client";
 
 import { AlertTriangle, BarChart3, Bot, Pencil, Search } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { FormEvent } from "react";
 import { Card } from "@/components/Card";
 import { ConfirmModal } from "@/components/ConfirmModal";
@@ -13,12 +13,14 @@ import { inventoryService } from "@/services/inventoryService";
 export default function InventoryPage() {
   const [rows, setRows] = useState<any[]>([]);
   const [suggestions, setSuggestions] = useState<any[]>([]);
+  const [search, setSearch] = useState("");
   const [form, setForm] = useState({ id: 0, stock: "", reorder_level: "" });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [confirm, setConfirm] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const formRef = useRef<HTMLDivElement>(null);
 
   const load = async () => {
     setLoading(true);
@@ -55,6 +57,24 @@ export default function InventoryPage() {
     }
   }
 
+  function moveToForm() {
+    setTimeout(() => {
+      formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      formRef.current?.querySelector<HTMLInputElement>("input:not([readonly])")?.focus();
+    }, 0);
+  }
+
+  function editInventory(row: any) {
+    setForm({ id: row.id, stock: String(row.stock), reorder_level: String(row.reorder_level) });
+    moveToForm();
+  }
+  const filteredRows = rows.filter((row) => {
+    const term = search.trim().toLowerCase();
+    return !term || [row.id, row.product_id, row.product_name, row.sku].some((value) => String(value || "").toLowerCase().includes(term));
+  });
+  const stockChartRows = rows.slice(0, 8);
+  const maxStock = Math.max(...stockChartRows.map((row) => Number(row.stock) || 0), 1);
+
   return (
     <div className="space-y-5">
       <PageHeader title="Inventory Management" subtitle="Track and optimize stock levels" />
@@ -67,14 +87,16 @@ export default function InventoryPage() {
           </div>
         </div>
       )}
-      <Card title="Stock Level Trend">
+      <Card title="Current Stock Levels">
         <div className="flex h-56 items-end gap-5 px-4">
-          {[72, 82, 66, 88, 98, 92].map((height, index) => (
-            <div key={index} className="flex flex-1 flex-col items-center gap-2">
-              <div className="w-full rounded-t-md bg-indigo-500" style={{ height: `${height}%` }} />
-              <span className="text-xs text-muted">{["Jan","Feb","Mar","Apr","May","Jun"][index]}</span>
+          {stockChartRows.map((row) => (
+            <div key={row.id} className="flex min-w-0 flex-1 flex-col items-center gap-2">
+              <span className="text-[10px] font-bold text-slate-500">{row.stock}</span>
+              <div className="w-full rounded-t-md bg-indigo-500" style={{ height: `${Math.max((Number(row.stock) / maxStock) * 85, 6)}%` }} />
+              <span className="max-w-full truncate text-[10px] text-muted" title={row.product_name || row.sku}>{row.sku || `#${row.product_id}`}</span>
             </div>
           ))}
+          {!stockChartRows.length && <div className="m-auto text-sm text-muted">No inventory data available.</div>}
         </div>
       </Card>
       <Card title="AI Restock Recommendations" className="bg-fuchsia-50/60">
@@ -84,40 +106,38 @@ export default function InventoryPage() {
           </div>
         )}
       </Card>
-      <div className="grid gap-5 xl:grid-cols-[360px_1fr]">
-        <div>
-          <Card title="Update Stock">
-            <form onSubmit={submit} className="space-y-3">
+      <div ref={formRef}>
+      <Card title="Update Stock">
+            <form onSubmit={submit} className="space-y-4">
+              <div className="theme-form-grid">
               <div className="theme-field"><label>Inventory ID</label><input value={form.id || ""} className="form-control" placeholder="Inventory ID" readOnly /></div>
               <div className="theme-field"><label>Stock</label><input value={form.stock} onChange={(e) => setForm({ ...form, stock: e.target.value })} className="form-control" placeholder="Stock" required /></div>
               <div className="theme-field"><label>Reorder level</label><input value={form.reorder_level} onChange={(e) => setForm({ ...form, reorder_level: e.target.value })} className="form-control" placeholder="Reorder level" required /></div>
+              </div>
               {message && <div className="theme-alert success text-sm font-bold">{message}</div>}
               {error && <div className="theme-alert danger text-sm font-bold">{error}</div>}
-              <LoadingButton loading={saving} type="submit">Update Inventory</LoadingButton>
+              <div className="border-t border-line pt-4"><LoadingButton loading={saving} type="submit">Update Inventory</LoadingButton></div>
             </form>
           </Card>
-        </div>
-        <div>
+      </div>
           <Card
             title="Inventory"
             actions={
             <div className="app-search min-w-[280px] sm:min-w-[420px]">
               <Search className="h-4 w-4 text-slate-400" />
-              <input className="border-0 px-3 py-2 focus:shadow-none" placeholder="Search inventory by product name or SKU..." readOnly />
+              <input value={search} onChange={(e) => setSearch(e.target.value)} className="border-0 px-3 py-2 focus:shadow-none" placeholder="Search inventory by product name or SKU..." />
             </div>
             }
           >
-            <DataTable loading={loading} rows={rows} columns={[
+            <DataTable loading={loading} rows={filteredRows} columns={[
               { key: "id", label: "ID" },
-              { key: "product_id", label: "Product ID" },
+              { key: "product_name", label: "Product", render: (row) => <div><div className="font-bold text-ink">{row.product_name || `Product #${row.product_id}`}</div><div className="text-xs text-muted">{row.sku || `ID ${row.product_id}`}</div></div> },
               { key: "stock", label: "Stock", render: (row) => <span className="inline-flex items-center gap-2"><BarChart3 className="h-4 w-4 text-primary" />{row.stock} units</span> },
               { key: "reorder_level", label: "Reorder Level" },
               { key: "last_updated", label: "Last Updated" },
-              { key: "actions", label: "Actions", render: (row) => <button className="rounded-md bg-primary px-3 py-1.5 text-xs font-bold text-white" onClick={() => setForm({ id: row.id, stock: String(row.stock), reorder_level: String(row.reorder_level) })}>Restock</button> }
+              { key: "actions", label: "Actions", render: (row) => <button className="rounded-md bg-primary px-3 py-1.5 text-xs font-bold text-white" onClick={() => editInventory(row)}>Restock</button> }
             ]} />
           </Card>
-        </div>
-      </div>
       <ConfirmModal open={confirm} message="Are you sure you want to update this record?" confirmText="Update" loading={saving} onConfirm={save} onCancel={() => setConfirm(false)} />
     </div>
   );
