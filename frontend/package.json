@@ -4,8 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
+    "build": "set NEXT_DIST_DIR=.next-build&& next build",
+    "start": "set NEXT_DIST_DIR=.next-build&& next start",
     "lint": "next lint"
   },
   "dependencies": {
@@ -15,7 +15,8 @@
     "next": "15.5.15",
     "react": "19.0.0",
     "react-dom": "19.0.0",
-    "recharts": "^2.15.0"
+    "recharts": "^2.15.0",
+    "sweetalert2": "^11.26.25"
   },
   "devDependencies": {
     "@types/node": "^22.10.2",

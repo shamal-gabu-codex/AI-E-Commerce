@@ -1,14 +1,15 @@
 "use client";
 
-import { Eye, Pencil, Search, Trash2 } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { Eye, Pencil, Plus, Search, Trash2 } from "lucide-react";
+import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
-import { Card } from "@/components/Card";
-import { ConfirmModal } from "@/components/ConfirmModal";
-import { DataTable } from "@/components/DataTable";
-import { LoadingButton } from "@/components/Loading";
-import { PageHeader } from "@/components/PageHeader";
-import { brandService } from "@/services/brandService";
+import { Card } from "@/components/common/Card";
+import { ConfirmModal } from "@/components/common/ConfirmDialog";
+import { DataTable } from "@/components/tables/DataTable";
+import { LoadingButton } from "@/components/common/Loader";
+import { Modal } from "@/components/common/Modal";
+import { PageHeader } from "@/components/layout/PageHeader";
+import { brandService } from "@/features/brands/brand.service";
 
 type BrandRow = {
   id: number;
@@ -46,8 +47,8 @@ export default function BrandsPage() {
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [confirm, setConfirm] = useState<{ type: "save" | "delete"; id?: number } | null>(null);
-  const formRef = useRef<HTMLDivElement>(null);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [confirm, setConfirm] = useState<{ type: "delete"; id?: number } | null>(null);
 
   const load = async () => {
     setLoading(true);
@@ -65,19 +66,25 @@ export default function BrandsPage() {
   function submit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setMessage("");
-    setConfirm({ type: "save" });
+    save();
   }
 
   async function save() {
+    const duplicate = rows.find((row) => row.id !== form.id && row.name.trim().toLowerCase() === form.name.trim().toLowerCase());
+    if (duplicate) {
+      setMessage("Brand name must be unique");
+      return;
+    }
     setSaving(true);
     try {
       const payload = { name: form.name.trim(), description: form.description, status: form.status };
       if (form.id) await brandService.update(form.id, payload);
       else await brandService.create(payload);
+      const wasEdit = !!form.id;
       setForm(emptyForm);
-      setConfirm(null);
       await load();
-      setMessage(form.id ? "Brand updated" : "Brand saved");
+      setModalOpen(false);
+      setMessage(wasEdit ? "Brand updated" : "Brand saved");
     } catch (error: any) {
       setMessage(getErrorMessage(error, "Brand could not be saved"));
     } finally {
@@ -100,40 +107,22 @@ export default function BrandsPage() {
     }
   }
 
-  function moveToForm() {
-    setTimeout(() => {
-      formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-      formRef.current?.querySelector<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>("input, select, textarea")?.focus();
-    }, 0);
+  function openAddModal() {
+    setForm(emptyForm);
+    setMessage("");
+    setModalOpen(true);
   }
 
   function editBrand(row: BrandRow) {
     setForm({ id: row.id, name: row.name, description: row.description || "", status: row.status });
-    moveToForm();
+    setMessage("");
+    setModalOpen(true);
   }
 
   return (
     <div className="space-y-5">
       <PageHeader title="Brands" subtitle="Organize product brands and catalog ownership" />
-      <div ref={formRef}>
-      <Card title={form.id ? "Edit Brand" : "Add Brand"}>
-          <form onSubmit={submit} className="space-y-4">
-            <div className="grid gap-4 md:grid-cols-2">
-            <div className="theme-field"><label>Brand name</label><input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Brand name" className="form-control" required /></div>
-            <div className="theme-field"><label>Status</label><select value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value.toLowerCase() as "active" | "inactive" })} className="form-select" required>
-              <option value="active">Active</option>
-              <option value="inactive">Inactive</option>
-            </select></div>
-            <div className="theme-field md:col-span-2"><label>Description</label><textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="Description" className="form-control min-h-24" /></div>
-            </div>
-            {message && <div className="theme-alert success text-sm font-bold">{message}</div>}
-            <div className="flex gap-2 border-t border-line pt-4">
-              <LoadingButton loading={saving} type="submit">{form.id ? "Update" : "Save"}</LoadingButton>
-              {form.id > 0 && <button type="button" onClick={() => setForm(emptyForm)} className="app-secondary">Cancel</button>}
-            </div>
-          </form>
-        </Card>
-      </div>
+      {message && !modalOpen && <div className="theme-alert success text-sm font-bold">{message}</div>}
       <Card
         title="Brands"
         actions={
@@ -148,6 +137,7 @@ export default function BrandsPage() {
               <option value="inactive">Inactive</option>
             </select>
             <LoadingButton loading={loading} onClick={load}>Apply</LoadingButton>
+            <LoadingButton loading={false} type="button" onClick={openAddModal}><Plus className="h-4 w-4" /> Add</LoadingButton>
           </div>
         }
       >
@@ -183,7 +173,31 @@ export default function BrandsPage() {
           </div>
         </Card>
       )}
-      <ConfirmModal open={!!confirm} message={confirm?.type === "delete" ? "Are you sure you want to delete this record?" : form.id ? "Are you sure you want to update this record?" : "Are you sure you want to save this record?"} confirmText={confirm?.type === "delete" ? "Delete" : form.id ? "Update" : "Save"} loading={saving} onConfirm={() => confirm?.type === "delete" && confirm.id ? remove(confirm.id) : save()} onCancel={() => setConfirm(null)} />
+      <Modal
+        open={modalOpen}
+        title={form.id ? "Edit Brand" : "Add Brand"}
+        loading={saving}
+        onClose={() => { if (!saving) setModalOpen(false); }}
+        footer={
+          <>
+            <button type="button" className="app-secondary border-0" disabled={saving} onClick={() => setModalOpen(false)}>Cancel</button>
+            <LoadingButton loading={saving} type="submit" form="brand-form">{form.id ? "Update" : "Save"}</LoadingButton>
+          </>
+        }
+      >
+        <form id="brand-form" onSubmit={submit} className="space-y-4">
+          <div className="grid gap-4 md:grid-cols-2">
+            <div className="theme-field"><label>Brand name</label><input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Brand name" className="form-control" required /></div>
+            <div className="theme-field"><label>Status</label><select value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value.toLowerCase() as "active" | "inactive" })} className="form-select" required>
+              <option value="active">Active</option>
+              <option value="inactive">Inactive</option>
+            </select></div>
+            <div className="theme-field md:col-span-2"><label>Description</label><textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="Description" className="form-control min-h-24" /></div>
+          </div>
+          {message && modalOpen && <div className="theme-alert danger text-sm font-bold">{message}</div>}
+        </form>
+      </Modal>
+      <ConfirmModal open={!!confirm} message="Are you sure you want to delete this record?" confirmText="Delete" loading={saving} onConfirm={() => confirm?.id ? remove(confirm.id) : undefined} onCancel={() => setConfirm(null)} />
     </div>
   );
 }

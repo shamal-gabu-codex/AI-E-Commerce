@@ -3,11 +3,12 @@
 import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import { CheckCircle2, Mail, MessageSquareText, TriangleAlert } from "lucide-react";
-import { Card } from "@/components/Card";
-import { DataTable } from "@/components/DataTable";
-import { LoadingButton } from "@/components/Loading";
-import { PageHeader } from "@/components/PageHeader";
-import { api } from "@/services/api";
+import { Card } from "@/components/common/Card";
+import { DataTable } from "@/components/tables/DataTable";
+import { CardGridSkeleton, LoadingButton } from "@/components/common/Loader";
+import { PageHeader } from "@/components/layout/PageHeader";
+import { api } from "@/lib/api-client";
+import { confirmAction } from "@/lib/swal";
 
 export default function NotificationsPage() {
   const [rows, setRows] = useState<any[]>([]);
@@ -32,14 +33,15 @@ export default function NotificationsPage() {
   useEffect(() => { load(); }, []);
   async function send(type: "email" | "sms", e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    if (!window.confirm("Are you sure you want to process this action?")) return;
+    const form = e.currentTarget;
+    if (!(await confirmAction("Are you sure you want to process this action?"))) return;
     setSending(type);
     setMessage("");
     setError("");
-    const f = Object.fromEntries(new FormData(e.currentTarget));
+    const f = Object.fromEntries(new FormData(form));
     try {
       const response = await api.post(type === "email" ? "/notifications/send-email" : "/notifications/send-sms", f);
-      e.currentTarget.reset();
+      form.reset();
       await load();
       setMessage(response.data.status === "mock_sent"
         ? `${type === "email" ? "Email" : "SMS"} simulated. Add ${type === "email" ? "Brevo" : "Twilio"} credentials to enable live delivery.`
@@ -53,7 +55,7 @@ export default function NotificationsPage() {
   return (
     <div className="space-y-5">
       <PageHeader title="Alerts" subtitle="Send email through Brevo and SMS through Twilio" />
-      <div className="grid gap-4 md:grid-cols-2">
+      {loading ? <CardGridSkeleton cards={2} /> : <div className="grid gap-4 md:grid-cols-2">
         {[
           { key: "email", label: "Transactional Email", provider: "Brevo", icon: Mail },
           { key: "sms", label: "Transactional SMS", provider: "Twilio", icon: MessageSquareText }
@@ -71,7 +73,7 @@ export default function NotificationsPage() {
             </div>
           );
         })}
-      </div>
+      </div>}
       {message && <div className="theme-alert success"><CheckCircle2 className="h-5 w-5" /><span>{message}</span></div>}
       {error && <div className="theme-alert danger"><TriangleAlert className="h-5 w-5" /><span>{error}</span></div>}
       <Card title="Send Email Alert"><form onSubmit={(e) => send("email", e)} className="space-y-4"><div className="theme-form-grid"><div className="theme-field"><label>Recipient email</label><input name="to_email" type="email" placeholder="recipient@example.com" className="form-control" required /></div><div className="theme-field"><label>Subject</label><input name="subject" placeholder="Inventory alert" className="form-control" required /></div><div className="theme-field md:col-span-2 xl:col-span-1"><label>Message</label><textarea name="message" placeholder="Write the transactional email message..." className="form-control min-h-20" required /></div></div><div className="border-t border-line pt-4"><LoadingButton loading={sending === "email"} type="submit">Send through Brevo</LoadingButton></div></form></Card>

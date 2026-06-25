@@ -1,13 +1,14 @@
 "use client";
 
-import { Building2, Clock, Mail, Pencil, Phone, Search, Trash2 } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { Building2, Clock, Mail, Pencil, Phone, Plus, Search, Trash2 } from "lucide-react";
+import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
-import { Card } from "@/components/Card";
-import { ConfirmModal } from "@/components/ConfirmModal";
-import { LoadingButton, PanelSkeleton } from "@/components/Loading";
-import { PageHeader } from "@/components/PageHeader";
-import { supplierService } from "@/services/supplierService";
+import { Card } from "@/components/common/Card";
+import { ConfirmModal } from "@/components/common/ConfirmDialog";
+import { LoadingButton, PanelSkeleton } from "@/components/common/Loader";
+import { Modal } from "@/components/common/Modal";
+import { PageHeader } from "@/components/layout/PageHeader";
+import { supplierService } from "@/features/suppliers/supplier.service";
 
 const emptyForm = { id: 0, name: "", contact_person: "", email: "", phone: "", lead_time_days: "", address: "", status: "active" };
 
@@ -17,10 +18,10 @@ export default function SuppliersPage() {
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
-  const [confirm, setConfirm] = useState<{ type: "save" | "delete"; id?: number } | null>(null);
-  const formRef = useRef<HTMLDivElement>(null);
+  const [confirm, setConfirm] = useState<{ type: "delete"; id?: number } | null>(null);
 
   const load = async () => {
     setLoading(true);
@@ -35,19 +36,29 @@ export default function SuppliersPage() {
     e.preventDefault();
     setMessage("");
     setError("");
-    setConfirm({ type: "save" });
+    save();
   }
 
   async function save() {
+    const duplicate = rows.find((row) => {
+      const sameName = String(row.name || "").trim().toLowerCase() === form.name.trim().toLowerCase();
+      const sameEmail = form.email.trim() && String(row.email || "").trim().toLowerCase() === form.email.trim().toLowerCase();
+      return row.id !== form.id && (sameName || sameEmail);
+    });
+    if (duplicate) {
+      setError("Supplier name or email already exists.");
+      return;
+    }
     setSaving(true);
     const payload = { ...form, lead_time_days: Number(form.lead_time_days) };
     try {
       if (form.id) await supplierService.update(form.id, payload);
       else await supplierService.create(payload);
+      const wasEdit = !!form.id;
       setForm(emptyForm);
-      setConfirm(null);
-      setMessage(form.id ? "Supplier updated successfully." : "Supplier saved successfully.");
       await load();
+      setModalOpen(false);
+      setMessage(wasEdit ? "Supplier updated successfully." : "Supplier saved successfully.");
     } catch (err: any) {
       setError(err?.response?.data?.detail || "Supplier action failed.");
     } finally {
@@ -69,16 +80,18 @@ export default function SuppliersPage() {
     }
   }
 
-  function moveToForm() {
-    setTimeout(() => {
-      formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-      formRef.current?.querySelector<HTMLInputElement | HTMLSelectElement>("input, select")?.focus();
-    }, 0);
+  function openAddModal() {
+    setForm(emptyForm);
+    setMessage("");
+    setError("");
+    setModalOpen(true);
   }
 
   function editSupplier(row: any) {
     setForm({ ...row, lead_time_days: String(row.lead_time_days) });
-    moveToForm();
+    setMessage("");
+    setError("");
+    setModalOpen(true);
   }
   const filteredRows = rows.filter((row) => {
     const term = search.trim().toLowerCase();
@@ -88,28 +101,16 @@ export default function SuppliersPage() {
   return (
     <div className="space-y-5">
       <PageHeader title="Suppliers" subtitle="Manage your supplier relationships" />
-      <div ref={formRef}>
-      <Card title={form.id ? "Edit Supplier" : "Add New Supplier"}>
-          <form onSubmit={submit} className="space-y-4">
-            <div className="theme-form-grid">
-            {["name","contact_person","email","phone","lead_time_days","address"].map((n) => <div className="theme-field" key={n}><label>{n.replace("_"," ")}</label><input value={(form as any)[n]} onChange={(e) => setForm({ ...form, [n]: e.target.value })} placeholder={n.replace("_"," ")} className="form-control" required={n === "name" || n === "lead_time_days"} /></div>)}
-            <div className="theme-field">
-              <label>Status</label>
-              <select value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })} className="form-select"><option value="active">Active</option><option value="inactive">Inactive</option></select>
-            </div>
-            </div>
-            {message && <div className="theme-alert success text-sm font-bold">{message}</div>}
-            {error && <div className="theme-alert danger text-sm font-bold">{error}</div>}
-            <div className="flex gap-2 border-t border-line pt-4"><LoadingButton loading={saving} type="submit">{form.id ? "Update" : "Save"}</LoadingButton>{form.id > 0 && <button type="button" className="app-secondary" onClick={() => setForm(emptyForm)}>Cancel</button>}</div>
-          </form>
-      </Card>
-      </div>
+      {message && <div className="theme-alert success text-sm font-bold">{message}</div>}
       <Card
         title="Suppliers"
         actions={
-        <div className="app-search min-w-[280px] sm:min-w-[360px]">
-          <Search className="h-4 w-4 text-slate-400" />
-          <input value={search} onChange={(e) => setSearch(e.target.value)} className="border-0 px-3 py-2 focus:shadow-none" placeholder="Search suppliers..." />
+        <div className="flex flex-wrap items-center gap-2">
+          <LoadingButton loading={false} type="button" onClick={openAddModal}><Plus className="h-4 w-4" /> Add</LoadingButton>
+          <div className="app-search min-w-[280px] sm:min-w-[360px]">
+            <Search className="h-4 w-4 text-slate-400" />
+            <input value={search} onChange={(e) => setSearch(e.target.value)} className="border-0 px-3 py-2 focus:shadow-none" placeholder="Search suppliers..." />
+          </div>
         </div>
         }
       >
@@ -138,7 +139,30 @@ export default function SuppliersPage() {
           </div>
         )}
       </Card>
-      <ConfirmModal open={!!confirm} message={confirm?.type === "delete" ? "Are you sure you want to delete this record?" : form.id ? "Are you sure you want to update this record?" : "Are you sure you want to save this record?"} confirmText={confirm?.type === "delete" ? "Delete" : form.id ? "Update" : "Save"} loading={saving} onConfirm={() => confirm?.type === "delete" && confirm.id ? remove(confirm.id) : save()} onCancel={() => setConfirm(null)} />
+      <Modal
+        open={modalOpen}
+        title={form.id ? "Edit Supplier" : "Add Supplier"}
+        loading={saving}
+        onClose={() => { if (!saving) setModalOpen(false); }}
+        footer={
+          <>
+            <button type="button" className="app-secondary border-0" disabled={saving} onClick={() => setModalOpen(false)}>Cancel</button>
+            <LoadingButton loading={saving} type="submit" form="supplier-form">{form.id ? "Update" : "Save"}</LoadingButton>
+          </>
+        }
+      >
+        <form id="supplier-form" onSubmit={submit} className="space-y-4">
+          <div className="theme-form-grid">
+            {["name","contact_person","email","phone","lead_time_days","address"].map((n) => <div className="theme-field" key={n}><label>{n.replace("_"," ")}</label><input value={(form as any)[n]} onChange={(e) => setForm({ ...form, [n]: e.target.value })} placeholder={n.replace("_"," ")} className="form-control" required={n === "name" || n === "lead_time_days"} /></div>)}
+            <div className="theme-field">
+              <label>Status</label>
+              <select value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })} className="form-select"><option value="active">Active</option><option value="inactive">Inactive</option></select>
+            </div>
+          </div>
+          {error && <div className="theme-alert danger text-sm font-bold">{error}</div>}
+        </form>
+      </Modal>
+      <ConfirmModal open={!!confirm} message="Are you sure you want to delete this record?" confirmText="Delete" loading={saving} onConfirm={() => confirm?.id ? remove(confirm.id) : undefined} onCancel={() => setConfirm(null)} />
     </div>
   );
 }

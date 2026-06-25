@@ -2,20 +2,26 @@
 
 import { useEffect, useState } from "react";
 import { AlertTriangle, Bot, CircleArrowRight, Package, ShoppingCart, Users } from "lucide-react";
-import { Card } from "@/components/Card";
-import { SalesTrendChart, TopProductsChart } from "@/components/Chart";
-import { DataTable } from "@/components/DataTable";
-import { CardGridSkeleton, GridSkeleton, PanelSkeleton } from "@/components/Loading";
-import { PageHeader } from "@/components/PageHeader";
-import { api } from "@/services/api";
+import { Card } from "@/components/common/Card";
+import { SalesTrendChart, TopProductsChart } from "@/components/dashboard/SalesChart";
+import { DataTable } from "@/components/tables/DataTable";
+import { CardGridSkeleton, GridSkeleton, PanelSkeleton } from "@/components/common/Loader";
+import { PageHeader } from "@/components/layout/PageHeader";
+import { api } from "@/lib/api-client";
 
 export default function DashboardPage() {
   const [data, setData] = useState<any>(null);
+  const [health, setHealth] = useState<any>(null);
   const [error, setError] = useState("");
   const load = () => {
     setError("");
     setData(null);
-    api.get("/dashboard").then((r) => setData(r.data)).catch(() => setError("Unable to load dashboard data. Check the backend connection and try again."));
+    Promise.all([api.get("/dashboard"), api.get("/ai/business-health")])
+      .then(([dashboard, healthScore]) => {
+        setData(dashboard.data);
+        setHealth(healthScore.data);
+      })
+      .catch(() => setError("Unable to load dashboard data. Check the backend connection and try again."));
   };
   useEffect(() => { load(); }, []);
   if (!data && !error) {
@@ -71,6 +77,24 @@ export default function DashboardPage() {
           );
         })}
       </div>
+      {health && (
+        <Card title="AI Business Health Score" className="border-emerald-100 bg-gradient-to-br from-emerald-50/70 to-white">
+          <div className="grid gap-4 md:grid-cols-[180px_1fr]">
+            <div className="rounded-xl bg-white p-4 text-center shadow-sm">
+              <div className="text-4xl font-extrabold text-ink">{health.overall_score}</div>
+              <div className="mt-1 text-xs font-bold uppercase text-muted">{health.risk_level} Risk</div>
+            </div>
+            <div className="grid gap-2 md:grid-cols-5">
+              {Object.entries(health.breakdown).map(([key, value]) => (
+                <div key={key} className="rounded-lg bg-white p-3 text-xs shadow-sm">
+                  <div className="mb-1 font-bold capitalize text-muted">{key.replaceAll("_", " ")}</div>
+                  <div className="text-lg font-extrabold text-ink">{String(value)}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </Card>
+      )}
       <Card className="border-blue-100 bg-gradient-to-br from-[#f5faff] to-white" title="AI Recommendations">
         <div className="grid gap-3 lg:grid-cols-2">
           {data.action_cards.map((a: any) => (

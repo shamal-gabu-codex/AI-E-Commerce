@@ -128,8 +128,10 @@ textarea:focus,
   gap: 0.5rem;
   justify-content: center;
   min-height: 2.55rem;
+  min-width: 5.75rem;
   padding: 0.55rem 1rem;
   transition: transform 160ms ease, box-shadow 160ms ease, opacity 160ms ease;
+  white-space: nowrap;
 }
 
 .app-action:hover {

@@ -2,20 +2,20 @@ from datetime import date, timedelta
 from decimal import Decimal
 
 from app.database import SessionLocal, init_db
-from app.models.alert import Alert
-from app.models.brand import Brand
-from app.models.chat import ChatHistory
-from app.models.inventory import Inventory
-from app.models.product import Product
-from app.models.recommendation import AIRecommendation
-from app.models.review import Review
-from app.models.sales import Sale
-from app.models.supplier import Supplier
-from app.models.uploaded_file import UploadedFile
-from app.models.user import User
-from app.services.ai.recommendation_engine import run_recommendations
-from app.services.ai.sentiment_analysis import analyze_review
-from app.utils.security import hash_password
+from app.modules.notifications.notification_model import Alert
+from app.modules.brands.brand_model import Brand
+from app.modules.chat.chat_model import ChatHistory
+from app.modules.inventory.inventory_model import Inventory
+from app.modules.products.product_model import Product
+from app.modules.ai.recommendation_model import AIRecommendation
+from app.modules.reviews.review_model import Review
+from app.modules.sales.sales_model import Sale
+from app.modules.suppliers.supplier_model import Supplier
+from app.modules.uploads.upload_model import UploadedFile
+from app.modules.auth.auth_model import User
+from app.modules.ai.recommendation_service import run_recommendations
+from app.modules.ai.sentiment_service import analyze_review
+from app.core.security import hash_password
 
 
 def seed():

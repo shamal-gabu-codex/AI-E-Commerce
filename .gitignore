@@ -8,6 +8,7 @@ backend/uploads/*
 !backend/uploads/.gitkeep
 frontend/.env.local
 frontend/.next/
+frontend/.next-build/
 frontend/node_modules/
 *.pyc
 *.log

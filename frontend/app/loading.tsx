@@ -1,4 +1,4 @@
-import { CardGridSkeleton, GridSkeleton, PanelSkeleton } from "@/components/Loading";
+import { CardGridSkeleton, GridSkeleton, PanelSkeleton } from "@/components/common/Loader";
 
 export default function Loading() {
   return (
