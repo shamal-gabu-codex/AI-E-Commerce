@@ -1,6 +1,6 @@
-import { Card } from "@/components/Card";
-import { ChatBox } from "@/components/ChatBox";
-import { PageHeader } from "@/components/PageHeader";
+import { Card } from "@/components/common/Card";
+import { ChatBox } from "@/components/chat/ChatBox";
+import { PageHeader } from "@/components/layout/PageHeader";
 
 export default function ChatPage() {
   return (

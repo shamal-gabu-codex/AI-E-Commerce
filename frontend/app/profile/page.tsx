@@ -2,11 +2,11 @@
 
 import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
-import { Card } from "@/components/Card";
-import { ConfirmModal } from "@/components/ConfirmModal";
-import { LoadingButton } from "@/components/Loading";
-import { PageHeader } from "@/components/PageHeader";
-import { authService } from "@/services/authService";
+import { Card } from "@/components/common/Card";
+import { ConfirmModal } from "@/components/common/ConfirmDialog";
+import { FormSkeleton, LoadingButton } from "@/components/common/Loader";
+import { PageHeader } from "@/components/layout/PageHeader";
+import { authService } from "@/features/auth/auth.service";
 
 export default function ProfilePage() {
   const [form, setForm] = useState({ name: "", email: "" });
@@ -53,7 +53,7 @@ export default function ProfilePage() {
     <div className="space-y-5">
       <PageHeader title="Profile" subtitle="Manage your account details" />
       <Card title="Update Profile">
-        {loading ? <div className="placeholder-glow"><span className="placeholder col-6 mb-3" /><span className="placeholder col-12 mb-3" /><span className="placeholder col-12" /></div> : (
+        {loading ? <FormSkeleton fields={2} /> : (
           <form onSubmit={submit} className="space-y-4">
             <div className="theme-form-grid">
             <div className="theme-field">

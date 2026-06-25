@@ -2,11 +2,11 @@
 
 import { Search } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Card } from "@/components/Card";
-import { DataTable } from "@/components/DataTable";
-import { LoadingButton } from "@/components/Loading";
-import { PageHeader } from "@/components/PageHeader";
-import { errorLogService } from "@/services/errorLogService";
+import { Card } from "@/components/common/Card";
+import { DataTable } from "@/components/tables/DataTable";
+import { LoadingButton } from "@/components/common/Loader";
+import { PageHeader } from "@/components/layout/PageHeader";
+import { errorLogService } from "@/features/error-logs/error-log.service";
 
 export default function ErrorLogsPage() {
   const [rows, setRows] = useState<any[]>([]);

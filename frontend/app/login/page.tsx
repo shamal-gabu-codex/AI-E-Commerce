@@ -5,7 +5,7 @@ import type { FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import { BarChart3, Boxes, CheckCircle2, Loader2, Lock, Mail, ShieldCheck, Sparkles, TrendingUp, User } from "lucide-react";
-import { authService } from "@/services/authService";
+import { authService } from "@/features/auth/auth.service";
 
 export default function LoginPage() {
   const router = useRouter();

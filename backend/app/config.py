@@ -10,7 +10,7 @@ class Settings(BaseSettings):
     secret_key: str = "change-me"
     access_token_expire_minutes: int = 60
     gemini_api_key: str | None = None
-    gemini_model: str = "gemini-1.5-flash"
+    gemini_model: str = "gemini-2.5-flash"
     redis_url: str | None = None
     brevo_api_key: str | None = None
     brevo_from_email: str | None = None

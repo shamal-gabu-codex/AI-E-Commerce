@@ -2,11 +2,11 @@
 
 import { useState } from "react";
 import type { FormEvent } from "react";
-import { Card } from "@/components/Card";
-import { ConfirmModal } from "@/components/ConfirmModal";
-import { LoadingButton } from "@/components/Loading";
-import { PageHeader } from "@/components/PageHeader";
-import { authService } from "@/services/authService";
+import { Card } from "@/components/common/Card";
+import { ConfirmModal } from "@/components/common/ConfirmDialog";
+import { LoadingButton } from "@/components/common/Loader";
+import { PageHeader } from "@/components/layout/PageHeader";
+import { authService } from "@/features/auth/auth.service";
 
 export default function ChangePasswordPage() {
   const [form, setForm] = useState({ current_password: "", new_password: "", confirm_password: "" });

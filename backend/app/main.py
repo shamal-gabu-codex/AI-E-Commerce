@@ -7,11 +7,23 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import inspect, text
 from sqlalchemy.exc import SQLAlchemyError
 
-from app.api import ai, auth, brands, chat, dashboard, error_logs, inventory, notifications, products, reviews, sales, suppliers, uploads
-from app.api.deps import get_current_user
+from app.dependencies import get_current_user
 from app.database import SessionLocal, engine, init_db
 from app.config import settings
-from app.services.error_log_service import write_error_log
+from app.modules.ai import ai_router as ai
+from app.modules.auth import auth_router as auth
+from app.modules.brands import brand_router as brands
+from app.modules.chat import chat_router as chat
+from app.modules.dashboard import dashboard_router as dashboard
+from app.modules.error_logs import error_log_router as error_logs
+from app.modules.inventory import inventory_router as inventory
+from app.modules.notifications import notification_router as notifications
+from app.modules.products import product_router as products
+from app.modules.reviews import review_router as reviews
+from app.modules.sales import sales_router as sales
+from app.modules.suppliers import supplier_router as suppliers
+from app.modules.uploads import upload_router as uploads
+from app.modules.error_logs.error_log_service import write_error_log
 
 
 @asynccontextmanager

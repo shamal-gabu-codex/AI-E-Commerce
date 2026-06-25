@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
-import { AppShell } from "@/components/AppShell";
+import { AppShell } from "@/components/layout/PageWrapper";
 import "bootstrap/dist/css/bootstrap.min.css";
+import "sweetalert2/dist/sweetalert2.min.css";
 import "./globals.css";
 
 export const metadata: Metadata = {
