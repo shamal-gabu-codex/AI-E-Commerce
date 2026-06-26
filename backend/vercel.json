@@ -6,6 +6,12 @@
       "use": "@vercel/python"
     }
   ],
+  "functions": {
+    "api/index.py": {
+      "maxDuration": 60,
+      "excludeFiles": "{.venv/**,.ven/**,__pycache__/**,uploads/**,logs/**,ai_ecommerce.db}"
+    }
+  },
   "routes": [
     {
       "src": "/(.*)",
